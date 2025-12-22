@@ -49,8 +49,8 @@ const Navbar = ({ user, cartCount, handleLogout }) => {
     <nav className="navbar">
       <div className="logo">
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src={logo} alt="Golden Harvest" className="logo-image" />
-          <span className="logo-text">Golden Harvest</span>
+          <img src={logo} alt="Agro Tech Harvest" className="logo-image" />
+          <span className="logo-text">Agro Tech Harvest</span>
         </Link>
       </div>
 

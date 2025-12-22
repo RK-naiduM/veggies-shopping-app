@@ -1,6 +1,6 @@
-# 🌾 Golden Harvest - MERN E-Commerce Platform
+# 🌾 Agro Tech Harvest - MERN E-Commerce Platform
 
-Golden Harvest is a full-stack E-commerce web application designed for selling fresh organic vegetables and raw powders. It features a complete shopping experience for users and a robust management dashboard for administrators.
+Agro Tech Harvest is a full-stack E-commerce web application designed for selling fresh organic vegetables and raw powders. It features a complete shopping experience for users and a robust management dashboard for administrators.
 
 Built with the **MERN Stack** (MongoDB, Express.js, React, Node.js).
 
@@ -78,7 +78,7 @@ Create a .env file inside the backend folder and add your configuration:
 Code snippet
 
 PORT=5000
-MONGO_URI=mongodb://localhost:27017/goldenharvest
+MONGO_URI=mongodb://localhost:27017/agrotechharvest
 JWT_SECRET=your_super_secret_key_here
 (Note: If using MongoDB Atlas, replace the URI with your cloud connection string).
 
@@ -116,7 +116,7 @@ You should see: ✅ Database Seeded!
 🔑 Admin Credentials
 To test the Admin Dashboard and Inventory features, use the default admin account:
 
-Email: admin@goldenharvest.com
+Email: admin@agrotechharvest.com
 Password: admin123
 
 📂 Project Structure

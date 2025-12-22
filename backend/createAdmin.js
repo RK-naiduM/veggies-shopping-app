@@ -13,7 +13,7 @@ mongoose.connect(MONGO_URI)
     console.log('✅ Connected to DB');
 
     // 1. Check if admin exists
-    const adminExists = await User.findOne({ email: 'admin@goldenharvest.com' });
+    const adminExists = await User.findOne({ email: 'admin@agrotechharvest.com' });
     if (adminExists) {
       console.log('⚠️ Admin already exists');
       process.exit();
@@ -26,13 +26,13 @@ mongoose.connect(MONGO_URI)
     // 3. Create Admin User
     const user = new User({
       name: 'Admin User',
-      email: 'admin@goldenharvest.com',
+      email: 'admin@agrotechharvest.com',
       password: hashedPassword,
       isAdmin: true // <--- THIS IS THE KEY
     });
 
     await user.save();
-    console.log('🎉 Admin User Created! Login with: admin@goldenharvest.com / admin123');
+    console.log('🎉 Admin User Created! Login with: admin@agrotechharvest.com / admin123');
     process.exit();
   })
   .catch((err) => console.error(err));

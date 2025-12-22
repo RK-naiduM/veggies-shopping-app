@@ -10,16 +10,16 @@ const HomePage = () => {
         
         {/* 2. REPLACED TEXT WITH LOGO IMAGE */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginBottom: '20px' }}>
-          <img src={logo} alt="Golden Harvest Logo" style={{ width: '80px', height: 'auto' }} />
-          <h1 style={styles.title}>Welcome to Golden Harvest</h1>
+          <img src={logo} alt="Agro Tech Harvest Logo" style={{ width: '80px', height: 'auto' }} />
+          <h1 style={styles.title}>Welcome to Agro Tech Harvest</h1>
         </div>
 
         <p style={styles.subtitle}>
           Fresh Vegetables & Pure Organic Powders delivered to your doorstep.
         </p>
-        <Link to="/category/vegetables" style={styles.ctaButton}>
+        {/* <Link to="/category/vegetables" style={styles.ctaButton}>
           Start Shopping
-        </Link>
+        </Link> */}
       </div>
 
       {/* Categories Section */}
@@ -52,18 +52,20 @@ const styles = {
     fontFamily: 'Arial, sans-serif',
   },
   hero: {
-    backgroundColor: '#27ae60', // Green background
+    backgroundColor: '#f9f9f9', // Green background
     color: 'white',
-    padding: '80px 20px',
+    padding: '50px 20px',
     textAlign: 'center',
     marginBottom: '40px'
   },
   title: {
     fontSize: '3rem',
+    color: '#27ae60',
     margin: 0 // Removed margin since the flexbox handles spacing
   },
   subtitle: {
     fontSize: '1.2rem',
+    color: '#27ae60',
     marginBottom: '30px',
     opacity: '0.9'
   },

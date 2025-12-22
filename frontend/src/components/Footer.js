@@ -12,8 +12,8 @@ const Footer = () => {
         <div className="footer-section">
             {/* Logo + Text Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
-                <img src={logo} alt="Golden Harvest" style={{ height: '40px' }} />
-                <h3 style={{ margin: 0 }}>Golden Harvest</h3>
+                <img src={logo} alt="Agro Tech Harvest" style={{ height: '40px' }} />
+                <h3 style={{ margin: 0 }}>Agro Tech Harvest</h3>
             </div>
           <p>
             Bringing you the freshest organic vegetables and pure raw powders directly from the farm to your table.
@@ -36,7 +36,7 @@ const Footer = () => {
           <h3>Contact Us</h3>
           <p>📍 123 Green Street, Farmers Market</p>
           <p>📞 +1 234 567 890</p>
-          <p>✉️ support@goldenharvest.com</p>
+          <p>✉️ support@Agrotechharvest.com</p>
           
           <div className="socials">
             <FaFacebook className="social-icon" />
@@ -48,7 +48,7 @@ const Footer = () => {
       </div>
 
       <div className="footer-bottom">
-        &copy; {new Date().getFullYear()} Golden Harvest. All rights reserved.
+        &copy; {new Date().getFullYear()} Agro Tech Harvest. All rights reserved.
       </div>
     </footer>
   );

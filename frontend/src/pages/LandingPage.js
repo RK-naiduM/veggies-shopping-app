@@ -9,7 +9,7 @@ const LandingPage = () => {
       <header style={styles.header}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img src={logo} alt="Logo" style={{ height: '50px' }} />
-          <h1 style={{ color: '#2c3e50', margin: 0 }}>Golden Harvest</h1>
+          <h1 style={{ color: '#2c3e50', margin: 0 }}>Agro Tech Harvest</h1>
         </div>
         <div>
           <Link to="/login" style={styles.loginBtn}>Login</Link>
@@ -48,7 +48,7 @@ const styles = {
   loginBtn: { marginRight: '20px', textDecoration: 'none', color: '#2c3e50', fontWeight: 'bold' },
   signupBtn: { padding: '10px 20px', backgroundColor: '#27ae60', color: 'white', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold' },
   hero: {
-    textAlign: 'center', padding: '100px 20px', backgroundColor: '#f9f9f9', color: '#333'
+    textAlign: 'center', padding: '50px 20px', backgroundColor: '#f9f9f9', color: '#333'
   },
   ctaButton: {
     padding: '15px 40px', backgroundColor: '#e67e22', color: 'white', fontSize: '1.2rem',
