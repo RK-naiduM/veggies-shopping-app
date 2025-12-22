@@ -16,6 +16,7 @@ import ProductDetails from './pages/ProductDetails';
 import AdminPage from './pages/AdminPage';
 import ProfilePage from './pages/ProfilePage';
 import InventoryPage from './pages/InventoryPage';
+import AboutUsPage from './pages/AboutUsPage';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -136,6 +137,8 @@ function App() {
             path="/admin/inventory" 
             element={user && user.isAdmin ? <InventoryPage /> : <Navigate to="/" />} 
           />
+
+          <Route path="/about" element={<AboutUsPage />} />
 
 
 
