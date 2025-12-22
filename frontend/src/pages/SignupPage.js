@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaHome } from 'react-icons/fa'; // Import Home Icon
+import API from '../api';
 
 const SignupPage = () => {
   const [name, setName] = useState('');
@@ -12,7 +13,8 @@ const SignupPage = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/auth/signup', { name, email, password });
+      //await axios.post('http://localhost:5000/api/auth/signup', { name, email, password });
+      await API.post('/auth/signup', { name, email, password });
       alert('Signup Successful! Please Login.');
       navigate('/login');
     } catch (err) {

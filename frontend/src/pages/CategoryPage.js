@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
+import API from '../api';
 
 const CategoryPage = ({ addToCart }) => {
   const [products, setProducts] = useState([]);
@@ -10,7 +11,8 @@ const CategoryPage = ({ addToCart }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/products/category/${categoryName}`);
+        //const res = await axios.get(`http://localhost:5000/api/products/category/${categoryName}`);
+        const res = await API.get(`/products/category/${categoryName}`);
         setProducts(res.data);
       } catch (err) {
         console.error("Error fetching products:", err);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaUserCircle, FaBoxOpen } from 'react-icons/fa';
+import API from '../api';
 
 const ProfilePage = ({ user }) => {
   const [myOrders, setMyOrders] = useState([]);
@@ -11,7 +12,8 @@ const ProfilePage = ({ user }) => {
         try {
           // We need the token to access the protected route if we added protection
           // For now, assuming public access or basic user access
-          const res = await axios.get(`http://localhost:5000/api/orders/user/${user.id}`);
+          //const res = await axios.get(`http://localhost:5000/api/orders/user/${user.id}`);
+          const res = await API.get(`/orders/user/${user.id}`);
           setMyOrders(res.data);
         } catch (err) {
           console.error("Error fetching orders:", err);

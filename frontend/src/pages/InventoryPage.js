@@ -55,7 +55,8 @@ const InventoryPage = () => {
         }
       };
 
-      await axios.put(`http://localhost:5000/api/products/${id}/stock`, { stock: newStock }, config);
+      //await axios.put(`http://localhost:5000/api/products/${id}/stock`, { stock: newStock }, config);
+      await API.put(`/products/${id}/stock`, { stock: newStock });
       
       alert('Stock Updated Successfully!');
       // Refresh list to show confirmed data from DB

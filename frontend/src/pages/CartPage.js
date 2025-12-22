@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API from '../api';
 
 const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
   const navigate = useNavigate();
@@ -66,7 +67,8 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
       const token = localStorage.getItem('token');
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
       
-      await axios.post('http://localhost:5000/api/orders', orderData, config);
+      //await axios.post('http://localhost:5000/api/orders', orderData, config);
+      await API.post('/orders', orderData);
       
       alert('Order Placed Successfully!');
       setCart([]); // Clear cart

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaHome } from 'react-icons/fa'; // Import Home Icon
+import API from '../api';
 
 const LoginPage = ({ setUser }) => {
   const [email, setEmail] = useState('');
@@ -11,7 +12,8 @@ const LoginPage = ({ setUser }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      //const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      const res = await API.post('/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('userInfo', JSON.stringify(res.data));
       setUser(res.data.user); 
