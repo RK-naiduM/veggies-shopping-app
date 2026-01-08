@@ -43,4 +43,30 @@ router.put('/:id/stock', protect, admin, async (req, res) => {
   }
 });
 
+// --- NEW ROUTE: CREATE PRODUCT ---
+router.post('/', protect, admin, async (req, res) => {
+  try {
+    const { name, image, description, category, price, stock } = req.body;
+
+    // Simple validation
+    if (!name || !image || !description || !category || !price) {
+      return res.status(400).json({ message: 'Please fill in all required fields' });
+    }
+
+    const product = new Product({
+      name,
+      image,
+      description,
+      category,
+      price: Number(price),
+      stock: Number(stock) || 0, // Default to 0 if not sent
+    });
+
+    const createdProduct = await product.save();
+    res.status(201).json(createdProduct);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
