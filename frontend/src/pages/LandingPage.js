@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'; 
+import { FaChevronUp, FaChevronDown } from 'react-icons/fa'; 
 import logo from '../assets/logo.png';
 import API from '../api'; 
 
@@ -87,6 +87,8 @@ const LandingPage = () => {
         <Link to="/signup" style={styles.ctaButton}>Join the Harvest</Link>
       </div>
 
+
+
       {/* --- CAROUSEL SECTION --- */}
       <div style={styles.carouselSection}>
         <h2 style={{ textAlign: 'center', color: '#2c3e50', marginBottom: '40px' }}>
@@ -95,12 +97,12 @@ const LandingPage = () => {
         
         <div style={styles.carouselWrapper}>
           
-          {/* LEFT ARROW */}
-          <button onClick={prevSlide} style={{...styles.arrowBtn, left: '-20px'}}>
-            <FaChevronLeft />
+          {/* UP ARROW (Previously Left) */}
+          <button onClick={prevSlide} style={styles.topArrowBtn}>
+            <FaChevronUp />
           </button>
 
-          {/* THE GRID (Shows exactly 3 items) */}
+          {/* THE GRID (Now stacking vertically) */}
           <div style={styles.productGrid}>
             
             {visibleProducts.length > 0 ? (
@@ -112,14 +114,15 @@ const LandingPage = () => {
                     style={styles.productImage} 
                   />
                   
-                  <h3 style={styles.productTitle}>{product.name}</h3>
-                  <p style={styles.productDesc}>
-                    {product.description.substring(0, 50)}...
-                  </p>
-                  
-                  <div style={styles.productFooter}>
-                    {/* <span style={styles.price}>₹{product.price}</span> */}
-                    <Link to={`/product/${product._id}`} style={styles.cardBtn}>View</Link>
+                  <div style={{padding: '0 10px'}}>
+                    <h3 style={styles.productTitle}>{product.name}</h3>
+                    <p style={styles.productDesc}>
+                      {product.description.substring(0, 50)}...
+                    </p>
+                    
+                    <div style={styles.productFooter}>
+                      <Link to={`/product/${product._id}`} style={styles.cardBtn}>View</Link>
+                    </div>
                   </div>
                 </div>
               ))
@@ -127,24 +130,14 @@ const LandingPage = () => {
               <p style={{ textAlign: 'center', width: '100%' }}>Loading products...</p>
             )}
 
-            {/* If we have fewer than 3 items on the last page, this empty div keeps alignment */}
-            {visibleProducts.length < 3 && visibleProducts.length > 0 && (
-               <div style={{ flex: 1 }}></div>
-            )}
-
           </div>
 
-          {/* RIGHT ARROW */}
-          <button onClick={nextSlide} style={{...styles.arrowBtn, right: '-20px'}}>
-            <FaChevronRight />
+          {/* DOWN ARROW (Previously Right) */}
+          <button onClick={nextSlide} style={styles.bottomArrowBtn}>
+            <FaChevronDown />
           </button>
 
         </div>
-
-        {/* Page Indicator (Optional: Shows "Page 1 of 4") */}
-        {/* <div style={{textAlign: 'center', marginTop: '20px', color: '#777'}}>
-            Showing {startIndex + 1}-{Math.min(startIndex + 3, powders.length)} of {powders.length}
-        </div> */}
       </div>
 
       {/* --- ABOUT --- */}
@@ -213,32 +206,36 @@ const styles = {
   },
   carouselWrapper: {
     position: 'relative',
-    padding: '0 40px', // Space for arrows
+    padding: '50px 0', // Changed padding to top/bottom for arrows
     display: 'flex',
-    alignItems: 'center'
+    flexDirection: 'column', // <--- MAKES IT VERTICAL
+    alignItems: 'center',    // Centers items horizontally
+    gap: '20px'
   },
   productGrid: {
     display: 'flex',
+    flexDirection: 'column', // <--- STACKS CARDS VERTICALLY
     gap: '20px',
     width: '100%',
-    justifyContent: 'center', // Centers items if less than 3
+    alignItems: 'center',    // Centers the cards
   },
   productCard: {
-    flex: '1', // Each card takes equal width
-    minWidth: '0', // Prevents flex item from overflowing
+    width: '100%',           
+    maxWidth: '500px',       // Limits width so they don't look stretched
     border: '1px solid #eee',
     borderRadius: '10px',
     padding: '15px',
     boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
     backgroundColor: 'white',
     textAlign: 'center',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between'
+    // Optional: Make the card content horizontal (Image left, text right)
+    // display: 'flex', 
+    // flexDirection: 'row', 
+    // alignItems: 'center'
   },
   productImage: {
-    width: '100%',
-    height: '200px',
+    width: '100%',           // Or fixed width (e.g., '150px') if using row layout
+    height: '250px',
     objectFit: 'cover',
     borderRadius: '8px',
     marginBottom: '15px'
@@ -247,49 +244,53 @@ const styles = {
     fontSize: '18px',
     color: '#34495e',
     margin: '0 0 10px 0',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis'
   },
   productDesc: {
     fontSize: '14px',
     color: '#777',
     marginBottom: '15px',
-    height: '40px',
-    overflow: 'hidden'
   },
   productFooter: {
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: 'center', // Center the button
     marginTop: 'auto'
   },
-  price: {
-    fontWeight: 'bold', 
-    color: '#27ae60', 
-    fontSize: '1.1rem'
-  },
   cardBtn: {
-    padding: '8px 15px', backgroundColor: '#3498db', color: 'white', 
-    textDecoration: 'none', borderRadius: '5px', fontSize: '14px', fontWeight: 'bold'
+    padding: '8px 25px', 
+    backgroundColor: '#3498db', 
+    color: 'white', 
+    textDecoration: 'none', 
+    borderRadius: '5px', 
+    fontSize: '14px', 
+    fontWeight: 'bold'
   },
-  arrowBtn: {
-    position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
+  
+  // SHARED ARROW STYLE
+  arrowBtnBase: {
     backgroundColor: '#2c3e50',
     color: 'white',
     border: 'none',
     borderRadius: '50%',
-    width: '45px',
-    height: '45px',
+    width: '40px',
+    height: '40px',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     cursor: 'pointer',
     zIndex: 10,
-    fontSize: '20px',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+    fontSize: '18px',
+    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)' // Centers arrow horizontally
+  },
+
+  // Combine base style with specific positions
+  get topArrowBtn() {
+    return { ...this.arrowBtnBase, top: '0' };
+  },
+  get bottomArrowBtn() {
+    return { ...this.arrowBtnBase, bottom: '0' };
   },
   
 
