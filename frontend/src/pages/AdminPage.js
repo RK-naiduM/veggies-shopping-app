@@ -37,6 +37,9 @@ const AdminPage = () => {
         }
       };
 
+
+
+      
       // Send update to backend
       //await axios.put(`http://localhost:5000/api/orders/${id}/status`, { status: newStatus }, config);
       await API.put(`/orders/${id}/status`, { status: newStatus });
