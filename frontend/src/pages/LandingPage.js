@@ -166,15 +166,15 @@ const LandingPage = () => {
             <h2 style={{ color: '#27ae60', marginBottom: '20px' }}>Contact Us</h2>
             <div style={styles.contactRow}>
 
-                <span style={{ fontSize: '24px' }}>📍</span> <p>123 Green Street, Farmers Market</p>
+                <span style={{ fontSize: '24px' }}>📍</span> <p>Suryapet, Telangana</p>
             </div>
             <div style={styles.contactRow}>
 
-                <span style={{ fontSize: '24px' }}>📞</span> <p>+1 234 567 890</p>
+                <span style={{ fontSize: '24px' }}>📞</span> <p>+91-9705116060</p>
             </div>
             <div style={styles.contactRow}>
 
-                <span style={{ fontSize: '24px' }}>✉️</span> <p>support@Agrotechharvest.com</p>
+                <span style={{ fontSize: '24px' }}>✉️</span> <p>Agrotecharvest@gmail.com</p>
             </div>
             </div>
 

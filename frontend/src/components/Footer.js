@@ -34,9 +34,9 @@ const Footer = () => {
         {/* Column 3: Contact */}
         <div className="footer-section">
           <h3>Contact Us</h3>
-          <p>📍 123 Green Street, Farmers Market</p>
-          <p>📞 +1 234 567 890</p>
-          <p>✉️ support@Agrotechharvest.com</p>
+          <p>📍 Suryapet, Telangana</p>
+          <p>📞 +91-9705116060</p>
+          <p>✉️ Agrotecharvest@gmail.com</p>
           
           <div className="socials">
             <FaFacebook className="social-icon" />
