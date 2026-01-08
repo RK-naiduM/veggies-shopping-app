@@ -43,6 +43,30 @@ router.put('/:id/stock', protect, admin, async (req, res) => {
   }
 });
 
+
+// --- UPDATE PRODUCT DETAILS (Name, Price, Desc, etc.) ---
+router.put('/:id', protect, admin, async (req, res) => {
+  try {
+    const { name, image, description, category, price } = req.body;
+    const product = await Product.findById(req.params.id);
+
+    if (product) {
+      product.name = name || product.name;
+      product.image = image || product.image;
+      product.description = description || product.description;
+      product.category = category || product.category;
+      product.price = price || product.price;
+
+      const updatedProduct = await product.save();
+      res.json(updatedProduct);
+    } else {
+      res.status(404).json({ message: 'Product not found' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // --- NEW ROUTE: CREATE PRODUCT ---
 router.post('/', protect, admin, async (req, res) => {
   try {
