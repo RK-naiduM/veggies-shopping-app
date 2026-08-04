@@ -54,8 +54,11 @@ router.post('/', protect, async (req, res) => {
         `
       };
 
-      await transporter.sendMail(mailOptions);
-      console.log('Email notification sent to admin!');
+      transporter.sendMail(mailOptions)
+        .then(() => console.log('Background email sent successfully!'))
+        .catch((err) => console.error('Background email failed:', err));
+
+      
     } catch (emailError) {
       // If email fails, we still want to return a success response to the customer 
       // because the order WAS saved in the database.
