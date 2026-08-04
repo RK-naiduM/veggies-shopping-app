@@ -200,6 +200,7 @@ const Navbar = ({ user, cartCount, handleLogout }) => {
                 <Link to="/about" className="nav-link">About Us</Link>
                 <Link to="/blog" className="nav-link">Blog</Link>
                 <Link to="/all-products" className="nav-link">Shop</Link>
+                <Link to="/bulk-order" className="nav-link">Bulk Order</Link>
                 <Link to="/contact" className="nav-link">Contact Us</Link>
               </div>
             )}
@@ -237,6 +238,8 @@ const Navbar = ({ user, cartCount, handleLogout }) => {
                       <Link to="/admin/inventory" className="dropdown-item" style={styles.dropdownItem} onClick={handleLinkClick}>Inventory</Link>
                       <Link to="/admin/contacts" className="dropdown-item" style={styles.dropdownItem} onClick={handleLinkClick}>Contact Us</Link>
                       <Link to="/admin/blogs" className="dropdown-item" style={styles.dropdownItem} onClick={handleLinkClick}>Blogs</Link>
+                      <Link to="/admin/bulk-orders" className="dropdown-item" style={styles.dropdownItem} onClick={handleLinkClick}>Bulk Orders</Link>
+
                     </div>
                   </div>
                 )}

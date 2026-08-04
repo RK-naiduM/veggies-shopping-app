@@ -5,6 +5,7 @@ const path = require('path');
 require('dotenv').config();
 
 const productRoutes = require('./routes/productRoutes');
+const bulkOrderRoutes = require('./routes/bulkOrderRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const authRoutes = require('./routes/authRoutes');
 const contactUs = require('./routes/contactUs');
@@ -29,6 +30,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Routes
 app.use('/api/products', productRoutes);
+app.use('/api/bulk-orders', bulkOrderRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/contact', contactUs);

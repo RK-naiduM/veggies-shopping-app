@@ -24,6 +24,8 @@ import AdminContactsPage from './pages/AdminContactsPage';
 import AdminBlogPage from './pages/AdminBlogPage';
 import BlogPage from './pages/BlogPage';
 import BlogDetailsPage from './pages/BlogDetailsPage';
+import BulkOrderForm from './pages/BulkOrderForm';
+import AdminBulkOrdersPage from './pages/AdminBulkOrdersPage';
 
 function AppContent() {
   const [user, setUser] = useState(null);
@@ -105,6 +107,7 @@ function AppContent() {
           <Route path="/about" element={<AboutUsPage />} />
           <Route path="/all-products" element={<AllProductsPage />} />
           <Route path="/contact" element={<ContactUsPage />} />
+          <Route path="/bulk-order" element={<BulkOrderForm />} />
           
           {/* Login/Signup: Redirect to '/shop' if already logged in */}
           <Route path="/login" element={!user ? <LoginPage setUser={setUser} /> : <Navigate to="/shop" />} />
@@ -130,6 +133,7 @@ function AppContent() {
           <Route path="/admin/inventory" element={user && user.isAdmin ? <InventoryPage /> : <Navigate to="/" />} />
           <Route path="/admin/contacts" element={user && user.isAdmin ? <AdminContactsPage /> : <Navigate to="/" />} />
           <Route path="/admin/blogs" element={user && user.isAdmin ? <AdminBlogPage /> : <Navigate to="/" />} />
+          <Route path="/admin/bulk-orders" element={user && user.isAdmin ? <AdminBulkOrdersPage /> : <Navigate to="/" />} />
 
         </Routes>
       </div>
