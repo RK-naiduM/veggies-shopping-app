@@ -217,6 +217,9 @@ const Navbar = ({ user, cartCount, handleLogout }) => {
               </>
             ) : (
               <div style={styles.loggedInActions}>
+                <Link to="/bulk-order" className="nav-link" onClick={handleLinkClick}>
+                  Bulk Orders
+                </Link>
                 <div className="dropdown-container" style={styles.dropdownContainer}>
                   <span className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
                     Categories <FaChevronDown size="0.8em"/>

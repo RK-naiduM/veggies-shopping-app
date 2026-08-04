@@ -107,7 +107,7 @@ function AppContent() {
           <Route path="/about" element={<AboutUsPage />} />
           <Route path="/all-products" element={<AllProductsPage />} />
           <Route path="/contact" element={<ContactUsPage />} />
-          <Route path="/bulk-order" element={<BulkOrderForm />} />
+          <Route path="/bulk-order" element={<BulkOrderForm user={user} />} />
           
           {/* Login/Signup: Redirect to '/shop' if already logged in */}
           <Route path="/login" element={!user ? <LoginPage setUser={setUser} /> : <Navigate to="/shop" />} />
@@ -115,14 +115,11 @@ function AppContent() {
 
           {/* --- PRIVATE ROUTES (The Dashboard) --- */}
           {/* This is the new home for logged in users */}
-          <Route 
-            path="/shop" 
-            element={user ? <ShopPage /> : <Navigate to="/login" />} 
-          /> 
+          <Route path="/shop" element={user ? <ShopPage /> : <Navigate to="/login" />} /> 
+          <Route path="/bulk-order" element={user ? <BulkOrderForm user={user} /> : <Navigate to="/login" />} />
           
           <Route path="/product/:id" element={<ProductDetails addToCart={addToCart} />} />
           <Route path="/category/:categoryName" element={<CategoryPage addToCart={addToCart} />} />
-          
           <Route path="/cart" element={user ? <CartPage user={user} cart={cart} setCart={setCart} removeFromCart={removeFromCart} updateQuantity={updateQuantity} /> : <Navigate to="/login" />} />
           <Route path="/profile" element={user ? <ProfilePage user={user} /> : <Navigate to="/login" />} />
           <Route path="/blog" element={<BlogPage />} />

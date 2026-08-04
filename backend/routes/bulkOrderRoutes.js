@@ -1,35 +1,69 @@
 const express = require('express');
 const router = express.Router();
+const nodemailer = require('nodemailer');
 const BulkOrder = require('../models/BulkOrder');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 // --- POST: CREATE A NEW BULK ORDER (Public Route) ---
-router.post('/', async (req, res) => {
+router.post('/', protect, async (req, res) => {
   try {
     const { 
-      companyName, 
-      contactPerson, 
-      email, 
-      phoneNumber, 
-      shippingAddress, 
-      orderDetails 
+      companyName, contactPerson, email, 
+      phoneNumber, shippingAddress, orderDetails 
     } = req.body;
 
-    // Basic validation
+    // 1. Basic validation
     if (!companyName || !contactPerson || !email || !phoneNumber || !shippingAddress || !orderDetails) {
       return res.status(400).json({ message: 'Please fill in all required fields' });
     }
 
+    // 2. Save to Database
     const bulkOrder = new BulkOrder({
-      companyName,
-      contactPerson,
-      email,
-      phoneNumber,
-      shippingAddress,
-      orderDetails
+      user: req.user._id,companyName, contactPerson, email,
+      phoneNumber, shippingAddress, orderDetails
     });
-
     const createdOrder = await bulkOrder.save();
+
+    // 3. --- SEND EMAIL NOTIFICATION ---
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_APP_PASSWORD
+        }
+      });
+
+      const mailOptions = {
+        from: process.env.GMAIL_USER,
+        to: process.env.GMAIL_USER, // Sending to yourself so you get the alert
+        subject: `🚨 New Bulk Order Alert: ${companyName}`,
+        text: `
+          You have received a new bulk order request!
+          
+          Company: ${companyName}
+          Contact Person: ${contactPerson}
+          Phone: ${phoneNumber}
+          Email: ${email}
+          Shipping Address: ${shippingAddress}
+          
+          Order Details:
+          ${orderDetails}
+          
+          Log into your Admin Dashboard to update the status.
+        `
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log('Email notification sent to admin!');
+    } catch (emailError) {
+      // If email fails, we still want to return a success response to the customer 
+      // because the order WAS saved in the database.
+      console.error('Order saved, but email failed to send:', emailError);
+    }
+    // ----------------------------------
+
+    // 4. Send success back to React frontend
     res.status(201).json(createdOrder);
     
   } catch (err) {
