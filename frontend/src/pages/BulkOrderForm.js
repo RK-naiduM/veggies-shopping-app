@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaPaperPlane, FaCheckCircle, FaExclamationCircle, FaBoxOpen, FaLock } from 'react-icons/fa';
+import { FaCheckCircle, FaExclamationCircle, FaBoxOpen, FaLock } from 'react-icons/fa';
 import { Link } from 'react-router-dom'; // Added for the login button
 import API from '../api'; 
 
