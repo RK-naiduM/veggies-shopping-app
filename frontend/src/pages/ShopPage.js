@@ -126,14 +126,14 @@ const ShopPage = () => {
         <div className="grid-container" style={styles.gridContainer}>
           
           {/* Card 1: Vegetables */}
-          <div className="category-card" style={styles.card}>
+          {/* <div className="category-card" style={styles.card}>
             <div className="card-icon" style={styles.icon}>🥕</div>
             <h3 style={styles.cardTitle}>Fresh Vegetables</h3>
             <p style={styles.cardDesc}>Daily harvested organic veggies.</p>
             <Link to="/category/vegetables" className="link-button" style={styles.linkButton}>
               Browse Veggies <FaArrowRight style={{ marginLeft: '8px', fontSize: '0.9em' }}/>
             </Link>
-          </div>
+          </div> */}
 
           {/* Card 2: Powders */}
           <div className="category-card" style={styles.card}>

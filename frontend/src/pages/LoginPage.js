@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { FaHome, FaEye, FaEyeSlash, FaExclamationCircle } from 'react-icons/fa'; 
 import gsap from 'gsap';
 import API from '../api';
@@ -11,6 +11,9 @@ const LoginPage = ({ setUser }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(''); 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const redirectUrl = location.state?.from || '/shop';
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,7 +28,7 @@ const LoginPage = ({ setUser }) => {
       setUser(data.user);
       
       // 3. REDIRECT: Send to Dashboard (/shop)
-      navigate('/shop');
+      navigate(redirectUrl);
       
     } catch (err) {
       console.error(err);

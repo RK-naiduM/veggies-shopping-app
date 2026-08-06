@@ -227,6 +227,7 @@ const Navbar = ({ user, cartCount, handleLogout }) => {
                   <div className="dropdown-menu" style={styles.dropdownMenu}>
                     <Link to="/category/vegetables" className="dropdown-item" style={styles.dropdownItem} onClick={handleLinkClick}>Vegetables</Link>
                     <Link to="/category/powders" className="dropdown-item" style={styles.dropdownItem} onClick={handleLinkClick}>Raw Powders</Link>
+                    <Link to="/bulk-order" className="dropdown-item" style={styles.dropdownItem} onClick={handleLinkClick}>Bulk Orders</Link>
                   </div>
                 </div>
 
@@ -309,6 +310,7 @@ const Navbar = ({ user, cartCount, handleLogout }) => {
                   <Link to="/" className="nav-link" onClick={handleLinkClick} style={styles.mobileLink}>Home</Link>
                   <Link to="/about" className="nav-link" onClick={handleLinkClick} style={styles.mobileLink}>About Us</Link>
                   <Link to="/blog" className="nav-link" onClick={handleLinkClick} style={styles.mobileLink}>Blog</Link>
+                  <Link to="/bulk-order" className="nav-link" onClick={handleLinkClick} style={styles.mobileLink}>Bulk Order</Link>
                   <Link to="/all-products" className="nav-link" onClick={handleLinkClick} style={styles.mobileLink}>Shop</Link>
                   <Link to="/contact" className="nav-link" onClick={handleLinkClick} style={styles.mobileLink}>Contact Us</Link>
                   <div style={{ height: '1px', background: '#e2e8f0', margin: '15px 0' }}></div>
@@ -320,7 +322,7 @@ const Navbar = ({ user, cartCount, handleLogout }) => {
                   <Link to="/shop" className="nav-link" onClick={handleLinkClick} style={styles.mobileLink}>Dashboard</Link>
                   <Link to="/category/vegetables" className="nav-link" onClick={handleLinkClick} style={styles.mobileLink}>Vegetables</Link>
                   <Link to="/category/powders" className="nav-link" onClick={handleLinkClick} style={styles.mobileLink}>Raw Powders</Link>
-                  
+                  <Link to="/bulk-order" className="nav-link" onClick={handleLinkClick} style={styles.mobileLink}>Bulk Orders</Link>
                   {/* 🔴 ADMIN MOBILE SECTION (Updated with Blogs) */}
                   {user.isAdmin && (
                     <>

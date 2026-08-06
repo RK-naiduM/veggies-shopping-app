@@ -33,7 +33,8 @@ const BulkOrderForm = ({ user }) => { // Accept the user prop!
               <p style={{ margin: 0, color: '#2c3e50', fontWeight: 'bold' }}>Please log in or create an account to submit a bulk order request.</p>
             </div>
             <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
-              <Link to="/login" style={{ padding: '12px 25px', backgroundColor: '#27ae60', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '16px' }}>Log In</Link>
+              {/* Add state={{ from: '/bulk-order' }} */}
+<Link to="/login" state={{ from: '/bulk-order' }} style={{ padding: '12px 25px', backgroundColor: '#27ae60', color: 'white', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '16px' }}>Log In</Link>
               <Link to="/signup" style={{ padding: '12px 25px', backgroundColor: 'white', color: '#27ae60', border: '2px solid #27ae60', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '16px' }}>Sign Up</Link>
             </div>
           </div>
@@ -69,6 +70,8 @@ const BulkOrderForm = ({ user }) => { // Accept the user prop!
       {/* Include your exact <style> block here that we used previously */}
       <style>
         {`
+          .responsive-row { display: flex; flex-direction: column; gap: 15px; } @media (min-width: 600px) { .responsive-row { flex-direction: row; } 
+  }
           @keyframes gradientMotion { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
           .animated-bg { background: linear-gradient(-45deg, #e8f5e9, #ffffff, #f1f8e9, #e0f2f1); background-size: 400% 400%; animation: gradientMotion 15s ease infinite; }
           .slide-right { animation: slideRight 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
@@ -118,7 +121,7 @@ const BulkOrderForm = ({ user }) => { // Accept the user prop!
                   <input type="text" name="companyName" value={formData.companyName} onChange={handleChange} style={styles.input} className="animated-input" required />
                 </div>
 
-                <div style={{ display: 'flex', gap: '15px' }}>
+                <div className="responsive-row">
                   <div style={{ ...styles.inputGroup, flex: 1 }}>
                     <label style={styles.label}>Contact Person *</label>
                     <input type="text" name="contactPerson" value={formData.contactPerson} onChange={handleChange} style={styles.input} className="animated-input" required />
