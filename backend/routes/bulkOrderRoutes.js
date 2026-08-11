@@ -31,6 +31,7 @@ router.post('/', protect, async (req, res) => {
         host: 'smtp.gmail.com',
         port: 587,
         secure: false, // Tells Node to use Port 587 (STARTTLS)
+        family: 4,
         auth: {
           user: process.env.GMAIL_USER,
           pass: process.env.GMAIL_APP_PASSWORD
