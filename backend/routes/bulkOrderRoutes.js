@@ -25,9 +25,12 @@ router.post('/', protect, async (req, res) => {
     const createdOrder = await bulkOrder.save();
 
     // 3. --- SEND EMAIL NOTIFICATION ---
-    try {
+
+      try {
       const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false, // Tells Node to use Port 587 (STARTTLS)
         auth: {
           user: process.env.GMAIL_USER,
           pass: process.env.GMAIL_APP_PASSWORD
