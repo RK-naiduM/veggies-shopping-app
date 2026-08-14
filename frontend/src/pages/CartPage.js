@@ -7,7 +7,6 @@ import {
   FaMapMarkerAlt, 
   FaMoneyBillWave,
   FaPhoneAlt,
-  FaClipboardList
 } from 'react-icons/fa';
 import gsap from 'gsap';
 import API from '../api';
