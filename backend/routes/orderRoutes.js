@@ -4,23 +4,27 @@ const Order = require('../models/Order');
 const { protect, admin } = require('../middleware/authMiddleware');
 const Product = require('../models/Product');
 
-// 1. CREATE ORDER (Now includes User ID)
+// 1. CREATE ORDER (Now includes User ID & Payment Method)
 router.post('/', async (req, res) => {
   try {
-    const { user, customerName, customerAddress, items, totalAmount } = req.body; // <--- Extract 'user'
+    // ---> ADDED paymentMethod extraction here
+    const { user, customerName, customerAddress, items, totalAmount, paymentMethod } = req.body; 
 
     const newOrder = new Order({
-      user, // <--- Save it
+      user, 
       customerName,
       customerAddress,
       items,
-      totalAmount
+      totalAmount,
+      // ---> ADDED Payment fields here
+      paymentMethod: paymentMethod || 'COD', 
+      paymentStatus: 'Pending' 
     });
 
 
     const savedOrder = await newOrder.save();
 
-    // --- NEW: REDUCE STOCK LOGIC ---
+    // --- ORIGINAL: REDUCE STOCK LOGIC (UNTOUCHED) ---
     // Loop through every item in the order and update the database
     for (const item of items) {
       const product = await Product.findById(item.productId);
@@ -29,11 +33,9 @@ router.post('/', async (req, res) => {
         await product.save();
       }
     }
-    // -------------------------------
+    // ------------------------------------------------
 
     res.status(201).json(savedOrder);
-
-
 
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -51,7 +53,6 @@ router.get('/user/:userId', async (req, res) => {
 });
 
 // 3. GET ALL ORDERS (LOCKED: Only for Admins)
-// We add 'protect' (must be logged in) and 'admin' (must be admin) arguments
 router.get('/', protect, admin, async (req, res) => {
   try {
     const orders = await Order.find().sort({ createdAt: -1 }).populate('user', 'id name email');
@@ -62,7 +63,7 @@ router.get('/', protect, admin, async (req, res) => {
 });
 
 
-// 4. UPDATE ORDER STATUS (Admin Only)
+// 4. UPDATE ORDER STATUS (Admin Only - Delivery Status)
 router.put('/:id/status', protect, admin, async (req, res) => {
   try {
     const { status } = req.body;
@@ -80,5 +81,23 @@ router.put('/:id/status', protect, admin, async (req, res) => {
   }
 });
 
+// ---> NEW ROUTE 5: UPDATE PAYMENT STATUS (Admin Only)
+// You will use this in your admin panel when the delivery boy brings the cash
+router.put('/:id/payment-status', protect, admin, async (req, res) => {
+  try {
+    const { paymentStatus } = req.body;
+    const order = await Order.findById(req.params.id);
+
+    if (order) {
+      order.paymentStatus = paymentStatus;
+      const updatedOrder = await order.save();
+      res.json(updatedOrder);
+    } else {
+      res.status(404).json({ message: 'Order not found' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 module.exports = router;

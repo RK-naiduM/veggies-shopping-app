@@ -1,15 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaTrashAlt, FaCheckCircle } from 'react-icons/fa';
+import { 
+  FaTrashAlt, 
+  FaCheckCircle, 
+  FaArrowLeft, 
+  FaMapMarkerAlt, 
+  FaMoneyBillWave 
+} from 'react-icons/fa';
 import gsap from 'gsap';
 import API from '../api';
 
 const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
-  // --- ORIGINAL STATE & LOGIC (UNTOUCHED) ---
   const navigate = useNavigate();
   const [customerName, setCustomerName] = useState(user ? user.name : '');
   const [customerAddress, setCustomerAddress] = useState('');
   
+  // --- NEW: Step State (1 = Shipping, 2 = Payment, 3 = Success) ---
+  const [currentStep, setCurrentStep] = useState(1);
+  const [finalAmount, setFinalAmount] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const BACKEND_URL = window.location.hostname === 'localhost' 
     ? "http://localhost:5000" 
     : "https://veggies-shopping-app.onrender.com";
@@ -45,11 +55,18 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
       return `${BACKEND_URL}/images/${imgString}`;
   };
 
-  const handlePlaceOrder = async () => {
-    if (!customerName || !customerAddress) {
-      alert("Please fill in your Name and Shipping Address to place the order.");
+  // --- NEW: Validation to move from Step 1 to Step 2 ---
+  const handleProceedToPayment = () => {
+    if (!customerName.trim() || !customerAddress.trim()) {
+      alert("Please fill in your Name and Shipping Address to proceed.");
       return;
     }
+    setCurrentStep(2);
+  };
+
+  // --- UPDATED: Sends COD data to backend ---
+  const handlePlaceOrder = async () => {
+    setIsSubmitting(true);
 
     const formattedItems = cart.map(item => ({
       productId: item._id,
@@ -63,17 +80,20 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
       customerName,
       customerAddress,
       items: formattedItems,
-      totalAmount: Number(totalAmount)
+      totalAmount: Number(totalAmount),
+      paymentMethod: 'COD' // <--- Tells backend this is Cash on Delivery
     };
 
     try {
       await API.post('/orders', orderData);
-      alert('Order Placed Successfully!');
+      setFinalAmount(totalAmount);
       setCart([]); 
-      navigate('/profile'); 
+      setCurrentStep(3); // <--- Moves to Success Screen instead of redirecting immediately
     } catch (err) {
       console.error(err);
-      alert('Failed to place order.');
+      alert('Failed to place order. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -81,16 +101,13 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
   const compRef = useRef(null);
 
   useEffect(() => {
-    if (cart.length === 0) return;
+    if (cart.length === 0 && currentStep !== 3) return;
 
     let ctx = gsap.context(() => {
-      // Staggered reveal for cart items
       gsap.fromTo('.cart-item-anim',
         { y: 40, opacity: 0, scale: 0.98 },
         { y: 0, opacity: 1, scale: 1, duration: 0.6, stagger: 0.1, ease: "power3.out" }
       );
-
-      // Checkout card slide in
       gsap.fromTo('.checkout-card-anim',
         { x: 50, opacity: 0 },
         { x: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.3 }
@@ -98,25 +115,11 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
     }, compRef);
 
     return () => ctx.revert();
-  }, [cart.length]);
+  }, [cart.length, currentStep]);
 
-  if (cart.length === 0) return (
+  if (cart.length === 0 && currentStep !== 3) return (
     <div className="ambient-bg" style={styles.emptyContainer}>
-      <style>
-        {`
-          @keyframes gradientFloat {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          }
-          .ambient-bg {
-            background: linear-gradient(-45deg, #fdfbfb, #f0fdf4, #e2f0ea, #fdfbfb);
-            background-size: 400% 400%;
-            animation: gradientFloat 15s ease infinite;
-            min-height: 100vh;
-          }
-        `}
-      </style>
+      {/* ... (Your existing empty cart styles) ... */}
       <div style={styles.emptyContent}>
         <h2 style={styles.emptyTitle}>Your Cart is Empty 🛒</h2>
         <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Looks like you haven't added any of our fresh harvest yet.</p>
@@ -128,7 +131,7 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
   return (
     <div ref={compRef} className="ambient-bg" style={styles.pageWrapper}>
       
-      {/* --- UPGRADED THEME CSS --- */}
+      {/* --- ALL CSS STYLES --- */}
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
@@ -145,7 +148,6 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
             min-height: 100vh;
           }
 
-          /* Input Focus Polish */
           .fancy-input { transition: all 0.3s ease; }
           .fancy-input:focus {
             outline: none;
@@ -153,21 +155,19 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
             box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.1) !important;
           }
 
-          /* Button Hovers */
           .hover-btn { transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
           .hover-btn:hover:not(:disabled) { transform: translateY(-2px); }
           .hover-btn:active:not(:disabled) { transform: translateY(0); }
 
           .checkout-btn { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-          .checkout-btn:hover {
+          .checkout-btn:hover:not(:disabled) {
             transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(39, 174, 96, 0.4) !important;
+            box-shadow: 0 15px 30px rgba(230, 126, 34, 0.4) !important;
           }
           
           .remove-btn { transition: all 0.2s ease; }
           .remove-btn:hover { color: #dc2626 !important; background: #fee2e2 !important; }
 
-          /* Cart Item Hover */
           .cart-item { transition: all 0.3s ease; }
           .cart-item:hover {
             transform: translateX(5px);
@@ -177,350 +177,226 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
         `}
       </style>
 
-      <div style={styles.container}>
-        
-        {/* LEFT SIDE: CART ITEMS */}
-        <div style={styles.cartSection}>
-          <h2 style={styles.pageTitle}>Your Shopping Cart</h2>
-          <p style={styles.itemCountText}>You have {cart.length} item{cart.length > 1 ? 's' : ''} in your cart.</p>
-          
-          <div style={styles.cartList}>
-            {cart.map((item) => (
-              <div key={item._id} className="cart-item-anim cart-item" style={styles.cartItem}>
-                
-                <div style={styles.imageWrapper}>
-                  <img 
-                    src={renderImageSrc(item.image)} 
-                    alt={item.name} 
-                    style={styles.image} 
-                  />
-                </div>
-                
-                <div style={styles.details}>
-                  <h3 style={styles.productTitle}>{item.name}</h3>
-                  <p style={styles.unitPrice}>₹{item.price} each</p>
-                  
-                  {/* Controls */}
-                  <div style={styles.controls}>
-                    <button onClick={() => updateQuantity(item._id, -1)} className="hover-btn" style={styles.qtyBtn}>-</button>
-                    <span style={styles.qtyNum}>{item.quantity}</span>
-                    <button onClick={() => handleIncrement(item)} className="hover-btn" style={styles.qtyBtn}>+</button>
-                  </div>
-                </div>
+      <div style={styles.mainLayout}>
 
-                <div style={styles.actions}>
-                  <p style={styles.totalPrice}>
-                    ₹{(item.price * item.quantity).toFixed(2)}
-                  </p>
-                  <button onClick={() => removeFromCart(item._id)} className="remove-btn" style={styles.removeBtn}>
-                    <FaTrashAlt style={{ marginRight: '6px' }} /> Remove
-                  </button>
+        {/* --- STEPPER PROGRESS BAR --- */}
+        {currentStep !== 3 && (
+          <div style={styles.stepperContainer}>
+            <div style={styles.stepBadge}>
+              <div style={currentStep >= 1 ? styles.stepCircleActive : styles.stepCircleInactive}>
+                {currentStep > 1 ? <FaCheckCircle size={16} /> : "1"}
+              </div>
+              <span style={currentStep >= 1 ? styles.stepTextActive : styles.stepTextInactive}>Shipping</span>
+            </div>
+            <div style={currentStep >= 2 ? styles.stepLineActive : styles.stepLineInactive} />
+            <div style={styles.stepBadge}>
+              <div style={currentStep >= 2 ? styles.stepCircleActive : styles.stepCircleInactive}>
+                {currentStep > 2 ? <FaCheckCircle size={16} /> : "2"}
+              </div>
+              <span style={currentStep >= 2 ? styles.stepTextActive : styles.stepTextInactive}>Payment</span>
+            </div>
+          </div>
+        )}
+
+        {/* --- STEP 3: ORDER CONFIRMATION VIEW --- */}
+        {currentStep === 3 ? (
+          <div style={styles.confirmationWrapper}>
+            <div style={styles.confirmationCard}>
+              <FaCheckCircle style={styles.successIcon} />
+              <h2 style={styles.confirmTitle}>Order Confirmed! 🎉</h2>
+              <p style={styles.confirmSubtitle}>
+                Thank you, <strong>{customerName}</strong>! Your veggies are being packed.
+              </p>
+              
+              <div style={styles.codAlertBox}>
+                <FaMoneyBillWave style={{ fontSize: '1.5rem', color: '#e67e22', marginRight: '10px' }} />
+                <div>
+                  <strong>Pay on Delivery</strong>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem' }}>Please keep <strong>₹{finalAmount}</strong> ready when your order arrives.</p>
                 </div>
+              </div>
+
+              <button onClick={() => navigate('/profile')} className="checkout-btn" style={styles.profileBtn}>
+                View Order Status
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div style={styles.container}>
+            
+            {/* LEFT SIDE: CART ITEMS */}
+            <div style={styles.cartSection}>
+              <h2 style={styles.pageTitle}>Your Shopping Cart</h2>
+              <p style={styles.itemCountText}>You have {cart.length} item{cart.length > 1 ? 's' : ''} in your cart.</p>
+              
+              <div style={styles.cartList}>
+                {cart.map((item) => (
+                  <div key={item._id} className="cart-item-anim cart-item" style={styles.cartItem}>
+                    <div style={styles.imageWrapper}>
+                      <img src={renderImageSrc(item.image)} alt={item.name} style={styles.image} />
+                    </div>
+                    <div style={styles.details}>
+                      <h3 style={styles.productTitle}>{item.name}</h3>
+                      <p style={styles.unitPrice}>₹{item.price} each</p>
+                      <div style={styles.controls}>
+                        <button onClick={() => updateQuantity(item._id, -1)} className="hover-btn" style={styles.qtyBtn} disabled={currentStep === 2}>-</button>
+                        <span style={styles.qtyNum}>{item.quantity}</span>
+                        <button onClick={() => handleIncrement(item)} className="hover-btn" style={styles.qtyBtn} disabled={currentStep === 2}>+</button>
+                      </div>
+                    </div>
+                    <div style={styles.actions}>
+                      <p style={styles.totalPrice}>₹{(item.price * item.quantity).toFixed(2)}</p>
+                      {currentStep === 1 && (
+                        <button onClick={() => removeFromCart(item._id)} className="remove-btn" style={styles.removeBtn}>
+                          <FaTrashAlt style={{ marginRight: '6px' }} /> Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT SIDE: DYNAMIC CHECKOUT CARD */}
+            <div className="checkout-card-anim" style={styles.checkoutSection}>
+              <div style={styles.summaryCard}>
+                
+                {/* --- STEP 1: SHIPPING DETAILS --- */}
+                {currentStep === 1 && (
+                  <>
+                    <h3 style={styles.summaryTitle}>
+                      <FaMapMarkerAlt style={{ marginRight: '10px', color: '#27ae60' }} /> Shipping Details
+                    </h3>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>Full Name</label>
+                      <input type="text" placeholder="Enter your full name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="fancy-input" style={styles.input} />
+                    </div>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>Delivery Address</label>
+                      <textarea rows="3" placeholder="Enter your full delivery address" value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} className="fancy-input" style={{ ...styles.input, resize: 'vertical' }} />
+                    </div>
+                    <div style={styles.divider}></div>
+                    <div style={styles.totalRow}>
+                      <span style={styles.totalText}>Total Amount</span>
+                      <span style={styles.totalAmount}>₹{totalAmount}</span>
+                    </div>
+                    <button onClick={handleProceedToPayment} className="checkout-btn" style={styles.checkoutBtn}>
+                      Proceed to Payment
+                    </button>
+                  </>
+                )}
+
+                {/* --- STEP 2: PAYMENT INFO --- */}
+                {currentStep === 2 && (
+                  <>
+                    <button onClick={() => setCurrentStep(1)} style={styles.backLink}>
+                      <FaArrowLeft style={{ marginRight: '6px' }} /> Edit Shipping Address
+                    </button>
+                    <h3 style={styles.summaryTitle}>
+                      <FaMoneyBillWave style={{ marginRight: '10px', color: '#27ae60' }} /> Payment Method
+                    </h3>
+
+                    {/* Address Summary Box */}
+                    <div style={styles.addressSummaryBox}>
+                      <span style={styles.summaryBoxLabel}>Delivering To:</span>
+                      <strong style={{ color: '#0f172a' }}>{customerName}</strong>
+                      <p style={styles.summaryBoxText}>{customerAddress}</p>
+                    </div>
+
+                    {/* COD Option Box */}
+                    <div style={styles.gatewayOptionBox}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <input type="radio" checked readOnly style={{ marginRight: '10px', accentColor: '#27ae60' }} />
+                        <span style={{ fontWeight: '700', fontSize: '1rem', color: '#0f172a' }}>Cash on Delivery (COD)</span>
+                      </div>
+                      <p style={styles.gatewaySubtitle}>Pay with cash when your order arrives.</p>
+                    </div>
+
+                    <div style={styles.divider}></div>
+                    <div style={styles.totalRow}>
+                      <span style={styles.totalText}>Amount to Pay</span>
+                      <span style={styles.totalAmount}>₹{totalAmount}</span>
+                    </div>
+                    <button onClick={handlePlaceOrder} disabled={isSubmitting} className="checkout-btn" style={styles.checkoutBtn}>
+                      {isSubmitting ? 'Placing Order...' : `Place Order (Pay on Delivery)`}
+                    </button>
+                  </>
+                )}
 
               </div>
-            ))}
+            </div>
+
           </div>
-        </div>
-
-        {/* RIGHT SIDE: SHIPPING FORM & CHECKOUT */}
-        <div className="checkout-card-anim" style={styles.checkoutSection}>
-          <div style={styles.summaryCard}>
-            <h3 style={styles.summaryTitle}>
-              Shipping Details
-            </h3>
-            
-            {/* Name Input */}
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Full Name</label>
-              <input 
-                type="text" 
-                placeholder="Enter your full name"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="fancy-input"
-                style={styles.input}
-              />
-            </div>
-
-            {/* Address Input */}
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Delivery Address</label>
-              <textarea 
-                rows="3"
-                placeholder="Enter your full delivery address"
-                value={customerAddress}
-                onChange={(e) => setCustomerAddress(e.target.value)}
-                className="fancy-input"
-                style={{ ...styles.input, resize: 'vertical' }}
-              />
-            </div>
-
-            <div style={styles.divider}></div>
-
-            {/* Totals */}
-            <div style={styles.totalRow}>
-              <span style={styles.totalText}>Total Amount</span>
-              <span style={styles.totalAmount}>₹{totalAmount}</span>
-            </div>
-
-            <button onClick={handlePlaceOrder} className="checkout-btn" style={styles.checkoutBtn}>
-               <FaCheckCircle style={{ marginRight: '8px' }} /> Confirm Order
-            </button>
-          </div>
-        </div>
+        )}
 
       </div>
     </div>
   );
 };
 
-// --- DYNAMIC STYLES (MATCHING PREMIUM THEME) ---
+// --- DYNAMIC STYLES ---
 const styles = {
-  pageWrapper: {
-    fontFamily: "'Outfit', 'Segoe UI', sans-serif",
-    color: '#0f172a',
-    overflowX: 'hidden'
-  },
-  container: { 
-    maxWidth: '1300px', 
-    margin: '0 auto', 
-    padding: '60px 40px 100px 40px', 
-    display: 'flex', 
-    gap: '50px', 
-    flexWrap: 'wrap',
-    alignItems: 'flex-start'
-  },
-  emptyContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '80vh',
-    width: '100%',
-    fontFamily: "'Outfit', 'Segoe UI', sans-serif",
-  },
-  emptyContent: {
-    textAlign: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    backdropFilter: 'blur(16px)',
-    padding: '60px 40px',
-    borderRadius: '24px',
-    boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
-    border: '1px solid rgba(255,255,255,0.9)'
-  },
-  emptyTitle: {
-    color: '#0f172a',
-    fontSize: '2.5rem',
-    fontWeight: '800',
-    marginBottom: '15px'
-  },
-  continueBtn: {
-    marginTop: '30px',
-    padding: '16px 40px',
-    backgroundColor: '#27ae60',
-    color: 'white',
-    border: 'none',
-    borderRadius: '50px',
-    fontSize: '1.1rem',
-    fontWeight: '800',
-    cursor: 'pointer',
-    boxShadow: '0 8px 20px rgba(39, 174, 96, 0.25)',
-    transition: 'all 0.3s ease'
-  },
-  
-  // Left Side (Cart Items)
-  cartSection: { 
-    flex: '1 1 650px', 
-    minWidth: '300px' 
-  },
-  pageTitle: {
-    fontSize: 'clamp(2rem, 4vw, 3rem)',
-    color: '#0f172a',
-    margin: '0 0 10px 0',
-    fontWeight: '800',
-    letterSpacing: '-1px'
-  },
-  itemCountText: {
-    color: '#64748b',
-    fontSize: '1.1rem',
-    marginBottom: '40px'
-  },
-  cartList: { 
-    display: 'flex', 
-    flexDirection: 'column', 
-    gap: '20px' 
-  },
-  cartItem: { 
-    display: 'flex', 
-    gap: '25px', 
-    border: '1px solid rgba(255,255,255,0.9)', 
-    padding: '25px', 
-    borderRadius: '20px', 
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    backdropFilter: 'blur(10px)',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.03)'
-  },
-  imageWrapper: {
-    width: '100px', 
-    height: '100px', 
-    borderRadius: '16px',
-    overflow: 'hidden',
-    flexShrink: 0,
-    boxShadow: '0 8px 20px rgba(0,0,0,0.08)'
-  },
-  image: { 
-    width: '100%', 
-    height: '100%', 
-    objectFit: 'cover' 
-  },
-  details: { 
-    flex: 1 
-  },
-  productTitle: {
-    fontSize: '1.3rem',
-    color: '#0f172a',
-    margin: '0 0 5px 0',
-    fontWeight: '800'
-  },
-  unitPrice: {
-    color: '#64748b',
-    fontSize: '0.95rem',
-    margin: 0
-  },
-  controls: { 
-    display: 'flex', 
-    alignItems: 'center', 
-    marginTop: '15px',
-    backgroundColor: '#f8fafc',
-    border: '1px solid #e2e8f0',
-    borderRadius: '50px',
-    width: 'fit-content',
-    overflow: 'hidden'
-  },
-  qtyBtn: { 
-    padding: '8px 15px', 
-    cursor: 'pointer', 
-    backgroundColor: 'transparent', 
-    border: 'none',
-    color: '#0f172a',
-    fontWeight: '800',
-    fontSize: '1.1rem'
-  },
-  qtyNum: {
-    padding: '0 15px',
-    fontWeight: '800',
-    color: '#0f172a',
-    fontSize: '1.1rem'
-  },
-  actions: { 
-    textAlign: 'right',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    gap: '15px'
-  },
-  totalPrice: {
-    fontWeight: '800',
-    fontSize: '1.5rem',
-    color: '#0f172a',
-    margin: 0
-  },
-  removeBtn: { 
-    backgroundColor: 'transparent', 
-    color: '#ef4444', 
-    border: 'none', 
-    padding: '8px 15px', 
-    borderRadius: '50px', 
-    cursor: 'pointer',
-    fontWeight: '700',
-    fontSize: '0.9rem',
-    display: 'flex',
-    alignItems: 'center'
-  },
+  pageWrapper: { fontFamily: "'Outfit', 'Segoe UI', sans-serif", color: '#0f172a', overflowX: 'hidden' },
+  mainLayout: { maxWidth: '1300px', margin: '0 auto', padding: '40px 40px 100px 40px' },
+  container: { display: 'flex', gap: '50px', flexWrap: 'wrap', alignItems: 'flex-start' },
 
-  // Right Side (Checkout Form)
-  checkoutSection: { 
-    flex: '1 1 350px', 
-    minWidth: '300px' 
-  },
-  summaryCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    backdropFilter: 'blur(20px)',
-    padding: '40px 30px',
-    borderRadius: '24px',
-    border: '1px solid rgba(255,255,255,0.9)',
-    boxShadow: '0 25px 50px rgba(0,0,0,0.08)',
-    position: 'sticky',
-    top: '120px'
-  },
-  summaryTitle: {
-    borderBottom: '2px solid rgba(0,0,0,0.05)', 
-    paddingBottom: '15px', 
-    marginBottom: '25px',
-    color: '#0f172a',
-    fontSize: '1.5rem',
-    fontWeight: '800',
-    letterSpacing: '-0.5px'
-  },
-  formGroup: { 
-    marginBottom: '20px' 
-  },
-  label: { 
-    display: 'block', 
-    marginBottom: '8px', 
-    fontWeight: '700', 
-    fontSize: '0.95rem', 
-    color: '#334155' 
-  },
-  input: {
-    width: '100%',
-    padding: '14px 18px',
-    borderRadius: '12px',
-    border: '1px solid #cbd5e1',
-    backgroundColor: '#f8fafc',
-    fontSize: '1rem',
-    color: '#0f172a',
-    fontFamily: 'inherit',
-    boxSizing: 'border-box' 
-  },
-  divider: { 
-    height: '1px', 
-    backgroundColor: 'rgba(0,0,0,0.05)', 
-    margin: '30px 0' 
-  },
-  totalRow: { 
-    display: 'flex', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
-    marginBottom: '30px' 
-  },
-  totalText: {
-    fontWeight: '700',
-    color: '#475569',
-    fontSize: '1.1rem'
-  },
-  totalAmount: {
-    fontSize: '2.5rem', 
-    color: '#0f172a',
-    fontWeight: '800',
-    letterSpacing: '-1px'
-  },
-  checkoutBtn: { 
-    width: '100%',
-    padding: '18px', 
-    backgroundColor: '#e67e22', // Brand Orange for strong CTA
-    color: 'white', 
-    fontSize: '1.2rem', 
-    border: 'none', 
-    borderRadius: '50px', // Pill shape
-    cursor: 'pointer',
-    fontWeight: '800',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    boxShadow: '0 8px 20px rgba(230, 126, 34, 0.3)'
-  }
+  // Stepper
+  stepperContainer: { display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(16px)', padding: '15px 30px', borderRadius: '50px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', border: '1px solid rgba(255,255,255,0.9)', maxWidth: '500px', margin: '0 auto 40px auto' },
+  stepBadge: { display: 'flex', alignItems: 'center', gap: '10px' },
+  stepCircleActive: { width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#27ae60', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '0.95rem', boxShadow: '0 4px 12px rgba(39, 174, 96, 0.3)' },
+  stepCircleInactive: { width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#e2e8f0', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '0.95rem' },
+  stepTextActive: { fontWeight: '800', color: '#0f172a', fontSize: '0.95rem' },
+  stepTextInactive: { fontWeight: '600', color: '#94a3b8', fontSize: '0.95rem' },
+  stepLineActive: { flex: 1, height: '3px', backgroundColor: '#27ae60', margin: '0 15px', borderRadius: '10px' },
+  stepLineInactive: { flex: 1, height: '3px', backgroundColor: '#e2e8f0', margin: '0 15px', borderRadius: '10px' },
+
+  // Left Cart
+  cartSection: { flex: '1 1 650px', minWidth: '300px' },
+  pageTitle: { fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#0f172a', margin: '0 0 10px 0', fontWeight: '800', letterSpacing: '-1px' },
+  itemCountText: { color: '#64748b', fontSize: '1.1rem', marginBottom: '40px' },
+  cartList: { display: 'flex', flexDirection: 'column', gap: '20px' },
+  cartItem: { display: 'flex', gap: '25px', border: '1px solid rgba(255,255,255,0.9)', padding: '25px', borderRadius: '20px', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' },
+  imageWrapper: { width: '100px', height: '100px', borderRadius: '16px', overflow: 'hidden', flexShrink: 0 },
+  image: { width: '100%', height: '100%', objectFit: 'cover' },
+  details: { flex: 1 },
+  productTitle: { fontSize: '1.3rem', color: '#0f172a', margin: '0 0 5px 0', fontWeight: '800' },
+  unitPrice: { color: '#64748b', fontSize: '0.95rem', margin: 0 },
+  controls: { display: 'flex', alignItems: 'center', marginTop: '15px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '50px', width: 'fit-content', overflow: 'hidden' },
+  qtyBtn: { padding: '8px 15px', cursor: 'pointer', backgroundColor: 'transparent', border: 'none', color: '#0f172a', fontWeight: '800', fontSize: '1.1rem' },
+  qtyNum: { padding: '0 15px', fontWeight: '800', color: '#0f172a', fontSize: '1.1rem' },
+  actions: { textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', gap: '15px' },
+  totalPrice: { fontWeight: '800', fontSize: '1.5rem', color: '#0f172a', margin: 0 },
+  removeBtn: { backgroundColor: 'transparent', color: '#ef4444', border: 'none', padding: '8px 15px', borderRadius: '50px', cursor: 'pointer', fontWeight: '700', fontSize: '0.9rem', display: 'flex', alignItems: 'center' },
+
+  // Right Checkout
+  checkoutSection: { flex: '1 1 350px', minWidth: '300px' },
+  summaryCard: { backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(20px)', padding: '40px 30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.9)', boxShadow: '0 25px 50px rgba(0,0,0,0.08)', position: 'sticky', top: '120px' },
+  summaryTitle: { borderBottom: '2px solid rgba(0,0,0,0.05)', paddingBottom: '15px', marginBottom: '25px', color: '#0f172a', fontSize: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center' },
+  formGroup: { marginBottom: '20px' },
+  label: { display: 'block', marginBottom: '8px', fontWeight: '700', fontSize: '0.95rem', color: '#334155' },
+  input: { width: '100%', padding: '14px 18px', borderRadius: '12px', border: '1px solid #cbd5e1', backgroundColor: '#f8fafc', fontSize: '1rem', color: '#0f172a', fontFamily: 'inherit', boxSizing: 'border-box' },
+  divider: { height: '1px', backgroundColor: 'rgba(0,0,0,0.05)', margin: '30px 0' },
+  totalRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' },
+  totalText: { fontWeight: '700', color: '#475569', fontSize: '1.1rem' },
+  totalAmount: { fontSize: '2.5rem', color: '#0f172a', fontWeight: '800', letterSpacing: '-1px' },
+  checkoutBtn: { width: '100%', padding: '18px', backgroundColor: '#e67e22', color: 'white', fontSize: '1.2rem', border: 'none', borderRadius: '50px', cursor: 'pointer', fontWeight: '800', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 8px 20px rgba(230, 126, 34, 0.3)' },
+  
+  // Step 2 Additions
+  backLink: { background: 'none', border: 'none', color: '#64748b', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', padding: 0, marginBottom: '20px', display: 'flex', alignItems: 'center' },
+  addressSummaryBox: { backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '15px', marginBottom: '20px' },
+  summaryBoxLabel: { display: 'block', fontSize: '0.8rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', marginBottom: '4px' },
+  summaryBoxText: { margin: '4px 0 0 0', color: '#475569', fontSize: '0.9rem' },
+  gatewayOptionBox: { backgroundColor: '#f0fdf4', border: '2px solid #27ae60', borderRadius: '14px', padding: '16px', marginBottom: '20px' },
+  gatewaySubtitle: { margin: '6px 0 0 24px', color: '#64748b', fontSize: '0.85rem' },
+
+  // Confirmation View
+  confirmationWrapper: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' },
+  confirmationCard: { backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(20px)', padding: '50px 40px', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.9)', boxShadow: '0 30px 60px rgba(0,0,0,0.08)', textAlign: 'center', maxWidth: '550px', width: '100%' },
+  successIcon: { fontSize: '4.5rem', color: '#27ae60', marginBottom: '20px' },
+  confirmTitle: { fontSize: '2rem', fontWeight: '800', color: '#0f172a', marginBottom: '10px' },
+  confirmSubtitle: { color: '#475569', fontSize: '1.05rem', lineHeight: '1.5', marginBottom: '30px' },
+  codAlertBox: { display: 'flex', alignItems: 'center', backgroundColor: '#fff7ed', border: '1px solid #fed7aa', padding: '20px', borderRadius: '16px', textAlign: 'left', marginBottom: '30px', color: '#9a3412' },
+  profileBtn: { width: '100%', padding: '16px', backgroundColor: '#27ae60', color: 'white', fontSize: '1.1rem', border: 'none', borderRadius: '50px', cursor: 'pointer', fontWeight: '800', boxShadow: '0 8px 20px rgba(39, 174, 96, 0.3)' }
 };
 
 export default CartPage;
