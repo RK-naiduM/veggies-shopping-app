@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-// import axios from 'axios'; // You don't need this if you use API
 import API from '../api';
+// We can use your existing icons, plus a couple standard emojis for payments
+// 💰 for Paid, ⏳ for Pending
 
 const AdminPage = () => {
   const [orders, setOrders] = useState([]);
@@ -11,8 +12,6 @@ const AdminPage = () => {
     const fetchOrders = async () => {
       try {
         const token = localStorage.getItem('token');
-        
-        // Check if token exists before making request
         if (!token) {
              console.error("No token found");
              return;
@@ -22,9 +21,7 @@ const AdminPage = () => {
           headers: { Authorization: `Bearer ${token}` }
         };
         
-        // FIX: Pass 'config' as the second argument here
         const res = await API.get('/orders', config);
-        
         setOrders(res.data);
         setLoading(false);
       } catch (err) {
@@ -35,7 +32,7 @@ const AdminPage = () => {
     fetchOrders();
   }, []);
 
-  // 2. Handle Status Change
+  // 2. Handle Delivery Status Change (Original)
   const handleStatusChange = async (id, newStatus) => {
     try {
       const token = localStorage.getItem('token');
@@ -46,10 +43,8 @@ const AdminPage = () => {
         }
       };
 
-      // FIX: Pass 'config' as the third argument here
       await API.put(`/orders/${id}/status`, { status: newStatus }, config);
 
-      // Update UI instantly
       setOrders(orders.map(order => 
         order._id === id ? { ...order, status: newStatus } : order
       ));
@@ -61,10 +56,37 @@ const AdminPage = () => {
     }
   };
 
+  // 3. --- NEW: Handle Payment Status Change ---
+  const handlePaymentStatusChange = async (id, newPaymentStatus) => {
+    // Optional: Add a confirmation dialog before marking as paid
+    if (!window.confirm(`Are you sure you want to mark this COD order as ${newPaymentStatus}?`)) {
+        return;
+    }
 
-  // const lowStockItems = orders.flatMap(o => o.items).filter(i => false);
+    try {
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        }
+      };
 
-  // Helper: Get Color based on Status
+      // Calls the new route we built in the backend
+      await API.put(`/orders/${id}/payment-status`, { paymentStatus: newPaymentStatus }, config);
+
+      // Update UI instantly
+      setOrders(orders.map(order => 
+        order._id === id ? { ...order, paymentStatus: newPaymentStatus } : order
+      ));
+      
+    } catch (err) {
+      console.error("Error updating payment status:", err);
+      alert("Failed to update payment status");
+    }
+  };
+
+  // Helper: Get Color based on Delivery Status
   const getStatusColor = (status) => {
     switch (status) {
       case 'Pending': return '#f39c12';   // Orange
@@ -91,7 +113,11 @@ const AdminPage = () => {
               <th style={styles.th}>Items</th>
               <th style={styles.th}>Total</th>
               <th style={styles.th}>Date</th>
-              <th style={styles.th}>Status</th> {/* The Dropdown Column */}
+              {/* --- NEW HEADERS --- */}
+              <th style={styles.th}>Payment Method</th>
+              <th style={styles.th}>Payment Status</th>
+              {/* ----------------- */}
+              <th style={styles.th}>Delivery Status</th>
             </tr>
           </thead>
           <tbody>
@@ -112,7 +138,35 @@ const AdminPage = () => {
                 <td style={styles.td}>₹{order.totalAmount}</td>
                 <td style={styles.td}>{new Date(order.createdAt).toLocaleDateString()}</td>
                 
-                {/* --- THE STATUS DROPDOWN --- */}
+                {/* --- NEW: PAYMENT METHOD COLUMN --- */}
+                <td style={styles.td}>
+                  <span style={styles.methodBadge}>
+                    {order.paymentMethod || 'COD'}
+                  </span>
+                </td>
+
+                {/* --- NEW: PAYMENT STATUS COLUMN --- */}
+                <td style={styles.td}>
+                  {/* If it's paid, show a green label */}
+                  {order.paymentStatus === 'Paid' ? (
+                    <span style={styles.paidBadge}>💰 Paid</span>
+                  ) : (
+                    /* If pending, show a button to mark it as paid */
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <span style={styles.pendingBadge}>⏳ Pending</span>
+                        {order.paymentMethod === 'COD' && (
+                            <button 
+                                onClick={() => handlePaymentStatusChange(order._id, 'Paid')}
+                                style={styles.markPaidBtn}
+                            >
+                                Mark Paid
+                            </button>
+                        )}
+                    </div>
+                  )}
+                </td>
+                
+                {/* --- THE DELIVERY STATUS DROPDOWN (Original) --- */}
                 <td style={styles.td}>
                   <select
                     value={order.status}
@@ -142,7 +196,7 @@ const AdminPage = () => {
 
 // Internal CSS
 const styles = {
-  container: { padding: '30px', maxWidth: '1200px', margin: '0 auto' },
+  container: { padding: '30px', maxWidth: '1400px', margin: '0 auto' }, // Widened slightly for new columns
   tableContainer: { overflowX: 'auto', boxShadow: '0 4px 8px rgba(0,0,0,0.05)', borderRadius: '10px' },
   table: { width: '100%', borderCollapse: 'collapse', backgroundColor: 'white' },
   headerRow: { backgroundColor: '#2c3e50', color: 'white' },
@@ -157,6 +211,37 @@ const styles = {
     cursor: 'pointer',
     outline: 'none',
     backgroundColor: 'white'
+  },
+  // --- NEW STYLES ---
+  methodBadge: {
+    backgroundColor: '#f1f5f9',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    color: '#475569',
+    border: '1px solid #cbd5e1'
+  },
+  paidBadge: {
+    color: '#15803d',
+    fontWeight: 'bold',
+    fontSize: '14px'
+  },
+  pendingBadge: {
+    color: '#b45309',
+    fontWeight: 'bold',
+    fontSize: '14px'
+  },
+  markPaidBtn: {
+    backgroundColor: '#27ae60',
+    color: 'white',
+    border: 'none',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    fontSize: '11px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    marginTop: '4px'
   }
 };
 

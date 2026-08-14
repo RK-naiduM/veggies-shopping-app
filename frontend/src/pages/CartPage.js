@@ -117,13 +117,44 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
     return () => ctx.revert();
   }, [cart.length, currentStep]);
 
+
+
   if (cart.length === 0 && currentStep !== 3) return (
     <div className="ambient-bg" style={styles.emptyContainer}>
-      {/* ... (Your existing empty cart styles) ... */}
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+          
+          @keyframes gradientFloat {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+          }
+          
+          .ambient-bg {
+            background: linear-gradient(-45deg, #fdfbfb, #f0fdf4, #e2f0ea, #fdfbfb);
+            background-size: 400% 400%;
+            animation: gradientFloat 15s ease infinite;
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', 'Segoe UI', sans-serif;
+          }
+        `}
+      </style>
       <div style={styles.emptyContent}>
         <h2 style={styles.emptyTitle}>Your Cart is Empty 🛒</h2>
         <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Looks like you haven't added any of our fresh harvest yet.</p>
-        <button onClick={() => navigate('/shop')} style={styles.continueBtn}>Continue Shopping</button>
+        
+        <button 
+          onClick={() => navigate('/shop')} 
+          className="checkout-btn" 
+          style={styles.continueBtn}
+        >
+          Continue Shopping
+        </button>
       </div>
     </div>
   );
@@ -388,6 +419,20 @@ const styles = {
   summaryBoxText: { margin: '4px 0 0 0', color: '#475569', fontSize: '0.9rem' },
   gatewayOptionBox: { backgroundColor: '#f0fdf4', border: '2px solid #27ae60', borderRadius: '14px', padding: '16px', marginBottom: '20px' },
   gatewaySubtitle: { margin: '6px 0 0 24px', color: '#64748b', fontSize: '0.85rem' },
+
+  continueBtn: {
+    marginTop: '30px',
+    padding: '16px 40px',
+    backgroundColor: '#e67e22', // Brand Orange
+    color: 'white',
+    border: 'none',
+    borderRadius: '50px', // Pill shape
+    fontSize: '1.1rem',
+    fontWeight: '800',
+    cursor: 'pointer',
+    boxShadow: '0 8px 20px rgba(230, 126, 34, 0.3)',
+    transition: 'all 0.3s ease'
+  },
 
   // Confirmation View
   confirmationWrapper: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' },
