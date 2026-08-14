@@ -61,11 +61,33 @@ router.get('/user/:userId', async (req, res) => {
   }
 });
 
-// 3. GET ALL ORDERS (LOCKED: Only for Admins)
+// 3. GET ALL ORDERS (LOCKED: Only for Admins) - NOW WITH PAGINATION
 router.get('/', protect, admin, async (req, res) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 }).populate('user', 'id name email');
-    res.json(orders);
+    // 1. Get page and limit from the query string (default to page 1, 10 items per page)
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    
+    // 2. Calculate how many documents to skip
+    const skip = (page - 1) * limit;
+
+    // 3. Get the total count of orders in the DB
+    const totalOrders = await Order.countDocuments();
+
+    // 4. Fetch only the specific chunk of orders for this page
+    const orders = await Order.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('user', 'id name email');
+
+    // 5. Send back the orders PLUS the pagination metadata
+    res.json({
+      orders,
+      currentPage: page,
+      totalPages: Math.ceil(totalOrders / limit),
+      totalOrders
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

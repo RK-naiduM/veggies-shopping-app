@@ -6,9 +6,13 @@ const AdminPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. Fetch All Orders
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+// 1. Fetch Orders (Updated for Pagination)
   useEffect(() => {
     const fetchOrders = async () => {
+      setLoading(true); // Ensure loading shows when switching pages
       try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -20,8 +24,13 @@ const AdminPage = () => {
           headers: { Authorization: `Bearer ${token}` }
         };
         
-        const res = await API.get('/orders', config);
-        setOrders(res.data);
+        // --- NEW: Send page number in the query string ---
+        const res = await API.get(`/orders?page=${currentPage}&limit=10`, config);
+        
+        // --- NEW: Extract data from the new backend payload structure ---
+        setOrders(res.data.orders);
+        setTotalPages(res.data.totalPages);
+        
         setLoading(false);
       } catch (err) {
         console.error("Error fetching orders:", err);
@@ -29,7 +38,7 @@ const AdminPage = () => {
       }
     };
     fetchOrders();
-  }, []);
+  }, [currentPage]);
 
   // 2. Handle Delivery Status Change 
   const handleStatusChange = async (id, newStatus) => {
@@ -220,6 +229,29 @@ const AdminPage = () => {
           </tbody>
         </table>
       </div>
+
+      {/* --- NEW: PAGINATION CONTROLS --- */}
+      <div style={styles.paginationContainer}>
+        <button 
+          style={{ ...styles.pageBtn, opacity: currentPage === 1 ? 0.5 : 1 }}
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+        >
+          &laquo; Previous
+        </button>
+        
+        <span style={styles.pageInfo}>
+          Page <strong>{currentPage}</strong> of <strong>{totalPages || 1}</strong>
+        </span>
+        
+        <button 
+          style={{ ...styles.pageBtn, opacity: currentPage === totalPages ? 0.5 : 1 }}
+          disabled={currentPage === totalPages || totalPages === 0}
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+        >
+          Next &raquo;
+        </button>
+      </div>
     </div>
   );
 };
@@ -247,6 +279,28 @@ const styles = {
     outline: 'none',
     backgroundColor: 'white',
     fontSize: '13px'
+  },
+  paginationContainer: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: '15px',
+    marginTop: '20px',
+    padding: '10px 0'
+  },
+  pageBtn: {
+    padding: '8px 16px',
+    backgroundColor: '#2c3e50',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'background 0.2s'
+  },
+  pageInfo: {
+    fontSize: '14px',
+    color: '#475569'
   },
   
   methodBadge: { backgroundColor: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', color: '#475569', border: '1px solid #cbd5e1' },
