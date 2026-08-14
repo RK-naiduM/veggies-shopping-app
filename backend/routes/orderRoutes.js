@@ -4,32 +4,41 @@ const Order = require('../models/Order');
 const { protect, admin } = require('../middleware/authMiddleware');
 const Product = require('../models/Product');
 
-// 1. CREATE ORDER (Now includes User ID & Payment Method)
+// 1. CREATE ORDER (Now includes Phone, Structured Address & Notes)
 router.post('/', async (req, res) => {
   try {
-    // ---> ADDED paymentMethod extraction here
-    const { user, customerName, customerAddress, items, totalAmount, paymentMethod } = req.body; 
+    // ---> REMOVED: customerAddress
+    // ---> ADDED: phone, shippingAddress, orderNotes
+    const { 
+      user, 
+      customerName, 
+      phone, 
+      shippingAddress, 
+      orderNotes, 
+      items, 
+      totalAmount, 
+      paymentMethod 
+    } = req.body; 
 
     const newOrder = new Order({
       user, 
       customerName,
-      customerAddress,
+      phone,             // <--- NEW
+      shippingAddress,   // <--- NEW (Object containing line1, line2, city, state, pincode)
+      orderNotes,        // <--- NEW
       items,
       totalAmount,
-      // ---> ADDED Payment fields here
       paymentMethod: paymentMethod || 'COD', 
       paymentStatus: 'Pending' 
     });
 
-
     const savedOrder = await newOrder.save();
 
     // --- ORIGINAL: REDUCE STOCK LOGIC (UNTOUCHED) ---
-    // Loop through every item in the order and update the database
     for (const item of items) {
       const product = await Product.findById(item.productId);
       if (product) {
-        product.stock = product.stock - item.quantity; // Subtract quantity
+        product.stock = product.stock - item.quantity;
         await product.save();
       }
     }

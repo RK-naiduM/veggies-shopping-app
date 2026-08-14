@@ -5,20 +5,31 @@ import {
   FaCheckCircle, 
   FaArrowLeft, 
   FaMapMarkerAlt, 
-  FaMoneyBillWave 
+  FaMoneyBillWave,
+  FaPhoneAlt,
+  FaClipboardList
 } from 'react-icons/fa';
 import gsap from 'gsap';
 import API from '../api';
 
 const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
   const navigate = useNavigate();
-  const [customerName, setCustomerName] = useState(user ? user.name : '');
-  const [customerAddress, setCustomerAddress] = useState('');
   
-  // --- NEW: Step State (1 = Shipping, 2 = Payment, 3 = Success) ---
+  // --- UPDATED STATE FOR NEW FIELDS ---
+  const [customerName, setCustomerName] = useState(user ? user.name : '');
+  const [phone, setPhone] = useState('');
+  const [shippingAddress, setShippingAddress] = useState({
+    line1: '',
+    line2: '',
+    city: '',
+    state: '',
+    pincode: ''
+  });
+  const [orderNotes, setOrderNotes] = useState('');
+  
   const [currentStep, setCurrentStep] = useState(1);
-  const [finalAmount, setFinalAmount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [finalAmount, setFinalAmount] = useState(0);
 
   const BACKEND_URL = window.location.hostname === 'localhost' 
     ? "http://localhost:5000" 
@@ -35,7 +46,6 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
   const handleIncrement = (item) => {
     const MAX_LIMIT = 10;
     const currentStock = item.stock; 
-    
     const effectiveLimit = Math.min(MAX_LIMIT, currentStock);
 
     if (item.quantity < effectiveLimit) {
@@ -55,16 +65,29 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
       return `${BACKEND_URL}/images/${imgString}`;
   };
 
-  // --- NEW: Validation to move from Step 1 to Step 2 ---
+  // Helper to update structured address object
+  const handleAddressChange = (e) => {
+    setShippingAddress({ ...shippingAddress, [e.target.name]: e.target.value });
+  };
+
+  // --- UPDATED VALIDATION LOGIC ---
   const handleProceedToPayment = () => {
-    if (!customerName.trim() || !customerAddress.trim()) {
-      alert("Please fill in your Name and Shipping Address to proceed.");
+    const { line1, city, state, pincode } = shippingAddress;
+    
+    if (!customerName.trim() || !phone.trim() || !line1.trim() || !city.trim() || !state.trim() || !pincode.trim()) {
+      alert("Please fill in all required fields (Name, Phone, Address Line 1, City, State, Pincode).");
       return;
     }
+
+    if (!/^\d{10}$/.test(phone)) {
+      alert("Please enter a valid 10-digit phone number.");
+      return;
+    }
+
     setCurrentStep(2);
   };
 
-  // --- UPDATED: Sends COD data to backend ---
+  // --- UPDATED PAYLOAD LOGIC ---
   const handlePlaceOrder = async () => {
     setIsSubmitting(true);
 
@@ -78,17 +101,19 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
     const orderData = {
       user: user ? user.id : null, 
       customerName,
-      customerAddress,
+      phone,
+      shippingAddress,
+      orderNotes,
       items: formattedItems,
       totalAmount: Number(totalAmount),
-      paymentMethod: 'COD' // <--- Tells backend this is Cash on Delivery
+      paymentMethod: 'COD'
     };
 
     try {
       await API.post('/orders', orderData);
-      setFinalAmount(totalAmount);
+      setFinalAmount(totalAmount); 
       setCart([]); 
-      setCurrentStep(3); // <--- Moves to Success Screen instead of redirecting immediately
+      setCurrentStep(3); 
     } catch (err) {
       console.error(err);
       alert('Failed to place order. Please try again.');
@@ -116,8 +141,6 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
 
     return () => ctx.revert();
   }, [cart.length, currentStep]);
-
-
 
   if (cart.length === 0 && currentStep !== 3) return (
     <div className="ambient-bg" style={styles.emptyContainer}>
@@ -147,12 +170,7 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
       <div style={styles.emptyContent}>
         <h2 style={styles.emptyTitle}>Your Cart is Empty 🛒</h2>
         <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Looks like you haven't added any of our fresh harvest yet.</p>
-        
-        <button 
-          onClick={() => navigate('/shop')} 
-          className="checkout-btn" 
-          style={styles.continueBtn}
-        >
+        <button onClick={() => navigate('/shop')} className="checkout-btn" style={styles.continueBtn}>
           Continue Shopping
         </button>
       </div>
@@ -161,8 +179,6 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
 
   return (
     <div ref={compRef} className="ambient-bg" style={styles.pageWrapper}>
-      
-      {/* --- ALL CSS STYLES --- */}
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
@@ -298,14 +314,51 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
                     <h3 style={styles.summaryTitle}>
                       <FaMapMarkerAlt style={{ marginRight: '10px', color: '#27ae60' }} /> Shipping Details
                     </h3>
+                    
+                    {/* Name & Phone */}
+                    <div style={styles.formRow}>
+                      <div style={styles.formGroupHalf}>
+                        <label style={styles.label}>Full Name <span style={styles.req}>*</span></label>
+                        <input type="text" placeholder="Enter full name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="fancy-input" style={styles.input} />
+                      </div>
+                      <div style={styles.formGroupHalf}>
+                        <label style={styles.label}>Phone Number <span style={styles.req}>*</span></label>
+                        <input type="text" placeholder="10-digit mobile" value={phone} onChange={(e) => setPhone(e.target.value)} className="fancy-input" style={styles.input} maxLength="10" />
+                      </div>
+                    </div>
+
+                    {/* Address Line 1 & 2 */}
                     <div style={styles.formGroup}>
-                      <label style={styles.label}>Full Name</label>
-                      <input type="text" placeholder="Enter your full name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="fancy-input" style={styles.input} />
+                      <label style={styles.label}>Address Line 1 <span style={styles.req}>*</span></label>
+                      <input type="text" name="line1" placeholder="House/Flat No., Building Name, Street" value={shippingAddress.line1} onChange={handleAddressChange} className="fancy-input" style={styles.input} />
                     </div>
                     <div style={styles.formGroup}>
-                      <label style={styles.label}>Delivery Address</label>
-                      <textarea rows="3" placeholder="Enter your full delivery address" value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} className="fancy-input" style={{ ...styles.input, resize: 'vertical' }} />
+                      <label style={styles.label}>Address Line 2 (Optional)</label>
+                      <input type="text" name="line2" placeholder="Locality, Area, Landmark" value={shippingAddress.line2} onChange={handleAddressChange} className="fancy-input" style={styles.input} />
                     </div>
+
+                    {/* City, State, Pincode Grid */}
+                    <div style={styles.formRowTri}>
+                      <div style={styles.formGroupTri}>
+                        <label style={styles.label}>City <span style={styles.req}>*</span></label>
+                        <input type="text" name="city" placeholder="City" value={shippingAddress.city} onChange={handleAddressChange} className="fancy-input" style={styles.input} />
+                      </div>
+                      <div style={styles.formGroupTri}>
+                        <label style={styles.label}>State <span style={styles.req}>*</span></label>
+                        <input type="text" name="state" placeholder="State" value={shippingAddress.state} onChange={handleAddressChange} className="fancy-input" style={styles.input} />
+                      </div>
+                      <div style={styles.formGroupTri}>
+                        <label style={styles.label}>Pincode <span style={styles.req}>*</span></label>
+                        <input type="text" name="pincode" placeholder="e.g. 500001" value={shippingAddress.pincode} onChange={handleAddressChange} className="fancy-input" style={styles.input} maxLength="6"/>
+                      </div>
+                    </div>
+
+                    {/* Order Notes */}
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>Order Notes (Optional)</label>
+                      <textarea rows="2" placeholder="Any special delivery instructions?" value={orderNotes} onChange={(e) => setOrderNotes(e.target.value)} className="fancy-input" style={{ ...styles.input, resize: 'vertical' }} />
+                    </div>
+
                     <div style={styles.divider}></div>
                     <div style={styles.totalRow}>
                       <span style={styles.totalText}>Total Amount</span>
@@ -330,8 +383,15 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
                     {/* Address Summary Box */}
                     <div style={styles.addressSummaryBox}>
                       <span style={styles.summaryBoxLabel}>Delivering To:</span>
-                      <strong style={{ color: '#0f172a' }}>{customerName}</strong>
-                      <p style={styles.summaryBoxText}>{customerAddress}</p>
+                      <strong style={{ color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {customerName} <span style={{ color: '#cbd5e1' }}>|</span> <FaPhoneAlt style={{ fontSize: '0.8rem', color: '#27ae60' }}/> {phone}
+                      </strong>
+                      <p style={styles.summaryBoxText}>
+                        {shippingAddress.line1}
+                        {shippingAddress.line2 && `, ${shippingAddress.line2}`}
+                        <br/>
+                        {shippingAddress.city}, {shippingAddress.state} - {shippingAddress.pincode}
+                      </p>
                     </div>
 
                     {/* COD Option Box */}
@@ -381,6 +441,11 @@ const styles = {
   stepLineActive: { flex: 1, height: '3px', backgroundColor: '#27ae60', margin: '0 15px', borderRadius: '10px' },
   stepLineInactive: { flex: 1, height: '3px', backgroundColor: '#e2e8f0', margin: '0 15px', borderRadius: '10px' },
 
+  emptyContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', width: '100%', fontFamily: "'Outfit', 'Segoe UI', sans-serif" },
+  emptyContent: { textAlign: 'center', backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(16px)', padding: '60px 40px', borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.05)', border: '1px solid rgba(255,255,255,0.9)' },
+  emptyTitle: { color: '#0f172a', fontSize: '2.5rem', fontWeight: '800', marginBottom: '15px' },
+  continueBtn: { marginTop: '30px', padding: '16px 40px', backgroundColor: '#e67e22', color: 'white', border: 'none', borderRadius: '50px', fontSize: '1.1rem', fontWeight: '800', cursor: 'pointer', boxShadow: '0 8px 20px rgba(230, 126, 34, 0.3)', transition: 'all 0.3s ease' },
+  
   // Left Cart
   cartSection: { flex: '1 1 650px', minWidth: '300px' },
   pageTitle: { fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#0f172a', margin: '0 0 10px 0', fontWeight: '800', letterSpacing: '-1px' },
@@ -399,13 +464,21 @@ const styles = {
   totalPrice: { fontWeight: '800', fontSize: '1.5rem', color: '#0f172a', margin: 0 },
   removeBtn: { backgroundColor: 'transparent', color: '#ef4444', border: 'none', padding: '8px 15px', borderRadius: '50px', cursor: 'pointer', fontWeight: '700', fontSize: '0.9rem', display: 'flex', alignItems: 'center' },
 
-  // Right Checkout
-  checkoutSection: { flex: '1 1 350px', minWidth: '300px' },
+  // Right Checkout (Updated for Grids)
+  checkoutSection: { flex: '1 1 400px', minWidth: '350px' }, // Slightly wider for grid inputs
   summaryCard: { backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(20px)', padding: '40px 30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.9)', boxShadow: '0 25px 50px rgba(0,0,0,0.08)', position: 'sticky', top: '120px' },
   summaryTitle: { borderBottom: '2px solid rgba(0,0,0,0.05)', paddingBottom: '15px', marginBottom: '25px', color: '#0f172a', fontSize: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center' },
+  
+  // New Form Layout Styles
+  formRow: { display: 'flex', gap: '15px', marginBottom: '20px' },
+  formRowTri: { display: 'flex', gap: '10px', marginBottom: '20px' },
+  formGroupHalf: { flex: 1 },
+  formGroupTri: { flex: 1 },
   formGroup: { marginBottom: '20px' },
-  label: { display: 'block', marginBottom: '8px', fontWeight: '700', fontSize: '0.95rem', color: '#334155' },
-  input: { width: '100%', padding: '14px 18px', borderRadius: '12px', border: '1px solid #cbd5e1', backgroundColor: '#f8fafc', fontSize: '1rem', color: '#0f172a', fontFamily: 'inherit', boxSizing: 'border-box' },
+  label: { display: 'block', marginBottom: '8px', fontWeight: '700', fontSize: '0.90rem', color: '#334155' },
+  req: { color: '#ef4444' }, // Red asterisk
+  input: { width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #cbd5e1', backgroundColor: '#f8fafc', fontSize: '0.95rem', color: '#0f172a', fontFamily: 'inherit', boxSizing: 'border-box' },
+  
   divider: { height: '1px', backgroundColor: 'rgba(0,0,0,0.05)', margin: '30px 0' },
   totalRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' },
   totalText: { fontWeight: '700', color: '#475569', fontSize: '1.1rem' },
@@ -415,24 +488,10 @@ const styles = {
   // Step 2 Additions
   backLink: { background: 'none', border: 'none', color: '#64748b', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', padding: 0, marginBottom: '20px', display: 'flex', alignItems: 'center' },
   addressSummaryBox: { backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '15px', marginBottom: '20px' },
-  summaryBoxLabel: { display: 'block', fontSize: '0.8rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', marginBottom: '4px' },
-  summaryBoxText: { margin: '4px 0 0 0', color: '#475569', fontSize: '0.9rem' },
+  summaryBoxLabel: { display: 'block', fontSize: '0.8rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', marginBottom: '8px' },
+  summaryBoxText: { margin: '8px 0 0 0', color: '#475569', fontSize: '0.95rem', lineHeight: '1.5' },
   gatewayOptionBox: { backgroundColor: '#f0fdf4', border: '2px solid #27ae60', borderRadius: '14px', padding: '16px', marginBottom: '20px' },
   gatewaySubtitle: { margin: '6px 0 0 24px', color: '#64748b', fontSize: '0.85rem' },
-
-  continueBtn: {
-    marginTop: '30px',
-    padding: '16px 40px',
-    backgroundColor: '#e67e22', // Brand Orange
-    color: 'white',
-    border: 'none',
-    borderRadius: '50px', // Pill shape
-    fontSize: '1.1rem',
-    fontWeight: '800',
-    cursor: 'pointer',
-    boxShadow: '0 8px 20px rgba(230, 126, 34, 0.3)',
-    transition: 'all 0.3s ease'
-  },
 
   // Confirmation View
   confirmationWrapper: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' },

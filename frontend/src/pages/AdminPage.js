@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import API from '../api';
-// We can use your existing icons, plus a couple standard emojis for payments
-// 💰 for Paid, ⏳ for Pending
+import { FaPhoneAlt, FaMapMarkerAlt, FaStickyNote } from 'react-icons/fa';
 
 const AdminPage = () => {
   const [orders, setOrders] = useState([]);
@@ -32,7 +31,7 @@ const AdminPage = () => {
     fetchOrders();
   }, []);
 
-  // 2. Handle Delivery Status Change (Original)
+  // 2. Handle Delivery Status Change 
   const handleStatusChange = async (id, newStatus) => {
     try {
       const token = localStorage.getItem('token');
@@ -56,10 +55,9 @@ const AdminPage = () => {
     }
   };
 
-  // 3. --- NEW: Handle Payment Status Change ---
+  // 3. Handle Payment Status Change 
   const handlePaymentStatusChange = async (id, newPaymentStatus) => {
-    // Optional: Add a confirmation dialog before marking as paid
-    if (!window.confirm(`Are you sure you want to mark this COD order as ${newPaymentStatus}?`)) {
+    if (!window.confirm(`Are you sure you want to mark this order as ${newPaymentStatus}?`)) {
         return;
     }
 
@@ -72,10 +70,8 @@ const AdminPage = () => {
         }
       };
 
-      // Calls the new route we built in the backend
       await API.put(`/orders/${id}/payment-status`, { paymentStatus: newPaymentStatus }, config);
 
-      // Update UI instantly
       setOrders(orders.map(order => 
         order._id === id ? { ...order, paymentStatus: newPaymentStatus } : order
       ));
@@ -89,11 +85,11 @@ const AdminPage = () => {
   // Helper: Get Color based on Delivery Status
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Pending': return '#f39c12';   // Orange
-      case 'Processing': return '#3498db'; // Blue
-      case 'Shipped': return '#9b59b6';    // Purple
-      case 'Delivered': return '#27ae60';  // Green
-      case 'Cancelled': return '#e74c3c';  // Red
+      case 'Pending': return '#f39c12';   
+      case 'Processing': return '#3498db'; 
+      case 'Shipped': return '#9b59b6';    
+      case 'Delivered': return '#27ae60';  
+      case 'Cancelled': return '#e74c3c';  
       default: return '#7f8c8d';
     }
   };
@@ -109,49 +105,83 @@ const AdminPage = () => {
           <thead>
             <tr style={styles.headerRow}>
               <th style={styles.th}>Order ID</th>
-              <th style={styles.th}>Customer</th>
+              <th style={styles.th}>Customer Info</th>
+              <th style={styles.th}>Shipping Address & Notes</th>
               <th style={styles.th}>Items</th>
               <th style={styles.th}>Total</th>
-              <th style={styles.th}>Date</th>
-              {/* --- NEW HEADERS --- */}
               <th style={styles.th}>Payment Method</th>
               <th style={styles.th}>Payment Status</th>
-              {/* ----------------- */}
               <th style={styles.th}>Delivery Status</th>
             </tr>
           </thead>
           <tbody>
             {orders.map((order) => (
               <tr key={order._id} style={styles.row}>
+                
+                {/* ID */}
                 <td style={styles.td}>#{order._id.slice(-6)}</td>
+                
+                {/* CUSTOMER INFO (Now includes Phone) */}
                 <td style={styles.td}>
                   <strong>{order.customerName}</strong><br/>
-                  <span style={{ fontSize: '12px', color: '#777' }}>{order.user?.email || 'Guest'}</span>
+                  <span style={{ fontSize: '12px', color: '#777' }}>{order.user?.email || 'Guest'}</span><br/>
+                  <span style={{ fontSize: '12px', color: '#27ae60', display: 'flex', alignItems: 'center', marginTop: '4px' }}>
+                    <FaPhoneAlt style={{ marginRight: '5px', fontSize: '10px' }}/> 
+                    {order.phone || 'N/A'}
+                  </span>
                 </td>
+
+                {/* SHIPPING DETAILS & NOTES (Structured Format) */}
+                <td style={styles.td}>
+                  <div style={styles.addressBox}>
+                    <FaMapMarkerAlt style={{ color: '#e67e22', marginTop: '2px', flexShrink: 0 }} />
+                    <div>
+                      {/* Backward compatibility for old orders without structured address */}
+                      {order.shippingAddress ? (
+                        <>
+                          {order.shippingAddress.line1}
+                          {order.shippingAddress.line2 && <><br/>{order.shippingAddress.line2}</>}
+                          <br/>
+                          {order.shippingAddress.city}, {order.shippingAddress.state} - <strong>{order.shippingAddress.pincode}</strong>
+                        </>
+                      ) : (
+                        <span>{order.customerAddress || 'No Address Data'}</span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {order.orderNotes && (
+                    <div style={styles.notesBox}>
+                      <FaStickyNote style={{ color: '#b45309', marginRight: '5px', flexShrink: 0 }} />
+                      <span>{order.orderNotes}</span>
+                    </div>
+                  )}
+                </td>
+
+                {/* ITEMS */}
                 <td style={styles.td}>
                   {order.items.map((item, idx) => (
-                    <div key={idx} style={{ fontSize: '13px' }}>
-                      {item.quantity} x {item.name}
+                    <div key={idx} style={{ fontSize: '13px', whiteSpace: 'nowrap' }}>
+                      <strong>{item.quantity}x</strong> {item.name}
                     </div>
                   ))}
                 </td>
-                <td style={styles.td}>₹{order.totalAmount}</td>
-                <td style={styles.td}>{new Date(order.createdAt).toLocaleDateString()}</td>
                 
-                {/* --- NEW: PAYMENT METHOD COLUMN --- */}
+                {/* TOTAL */}
+                <td style={styles.td}><strong>₹{order.totalAmount}</strong></td>
+                
+                {/* PAYMENT METHOD */}
                 <td style={styles.td}>
                   <span style={styles.methodBadge}>
                     {order.paymentMethod || 'COD'}
                   </span>
                 </td>
 
-                {/* --- NEW: PAYMENT STATUS COLUMN --- */}
+                {/* PAYMENT STATUS */}
                 <td style={styles.td}>
-                  {/* If it's paid, show a green label */}
                   {order.paymentStatus === 'Paid' ? (
                     <span style={styles.paidBadge}>💰 Paid</span>
                   ) : (
-                    /* If pending, show a button to mark it as paid */
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                         <span style={styles.pendingBadge}>⏳ Pending</span>
                         {order.paymentMethod === 'COD' && (
@@ -166,7 +196,7 @@ const AdminPage = () => {
                   )}
                 </td>
                 
-                {/* --- THE DELIVERY STATUS DROPDOWN (Original) --- */}
+                {/* DELIVERY STATUS */}
                 <td style={styles.td}>
                   <select
                     value={order.status}
@@ -196,13 +226,18 @@ const AdminPage = () => {
 
 // Internal CSS
 const styles = {
-  container: { padding: '30px', maxWidth: '1400px', margin: '0 auto' }, // Widened slightly for new columns
+  container: { padding: '30px', maxWidth: '1500px', margin: '0 auto' },
   tableContainer: { overflowX: 'auto', boxShadow: '0 4px 8px rgba(0,0,0,0.05)', borderRadius: '10px' },
   table: { width: '100%', borderCollapse: 'collapse', backgroundColor: 'white' },
-  headerRow: { backgroundColor: '#2c3e50', color: 'white' },
-  th: { padding: '15px', textAlign: 'left', borderBottom: '2px solid #ddd' },
+  headerRow: { backgroundColor: '#2c3e50', color: 'white', whiteSpace: 'nowrap' },
+  th: { padding: '15px', textAlign: 'left', borderBottom: '2px solid #ddd', fontSize: '14px' },
   row: { borderBottom: '1px solid #eee' },
   td: { padding: '15px', verticalAlign: 'middle' },
+  
+  // Custom styling for Address and Notes to keep it clean
+  addressBox: { display: 'flex', gap: '8px', fontSize: '12px', color: '#475569', lineHeight: '1.4', minWidth: '180px' },
+  notesBox: { display: 'flex', alignItems: 'flex-start', marginTop: '8px', padding: '6px 8px', backgroundColor: '#fffbeb', borderLeft: '3px solid #f59e0b', borderRadius: '0 4px 4px 0', fontSize: '11px', color: '#92400e' },
+  
   select: {
     padding: '8px',
     borderRadius: '5px',
@@ -210,39 +245,14 @@ const styles = {
     fontWeight: 'bold',
     cursor: 'pointer',
     outline: 'none',
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    fontSize: '13px'
   },
-  // --- NEW STYLES ---
-  methodBadge: {
-    backgroundColor: '#f1f5f9',
-    padding: '4px 8px',
-    borderRadius: '4px',
-    fontSize: '12px',
-    fontWeight: 'bold',
-    color: '#475569',
-    border: '1px solid #cbd5e1'
-  },
-  paidBadge: {
-    color: '#15803d',
-    fontWeight: 'bold',
-    fontSize: '14px'
-  },
-  pendingBadge: {
-    color: '#b45309',
-    fontWeight: 'bold',
-    fontSize: '14px'
-  },
-  markPaidBtn: {
-    backgroundColor: '#27ae60',
-    color: 'white',
-    border: 'none',
-    padding: '4px 8px',
-    borderRadius: '4px',
-    fontSize: '11px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    marginTop: '4px'
-  }
+  
+  methodBadge: { backgroundColor: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', color: '#475569', border: '1px solid #cbd5e1' },
+  paidBadge: { color: '#15803d', fontWeight: 'bold', fontSize: '13px', whiteSpace: 'nowrap' },
+  pendingBadge: { color: '#b45309', fontWeight: 'bold', fontSize: '13px', whiteSpace: 'nowrap' },
+  markPaidBtn: { backgroundColor: '#27ae60', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', marginTop: '4px', whiteSpace: 'nowrap' }
 };
 
 export default AdminPage;

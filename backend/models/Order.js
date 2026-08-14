@@ -3,7 +3,21 @@ const mongoose = require('mongoose');
 const orderSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   customerName: { type: String, required: true },
-  customerAddress: { type: String, required: true },
+  phone: { type: String, required: true },
+
+  // --- STRUCTURED SHIPPING ADDRESS ---
+  shippingAddress: {
+    line1: { type: String, required: true },
+    line2: { type: String }, // Optional
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    pincode: { type: String, required: true }
+  },
+  
+  orderNotes: { type: String }, // <--- NEW (Optional)
+  // --------------------------------
+
+
   items: [
     {
       productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
