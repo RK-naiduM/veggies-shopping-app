@@ -450,7 +450,7 @@ const styles = {
   pageTitle: { fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#0f172a', margin: '0 0 10px 0', fontWeight: '800', letterSpacing: '-1px' },
   itemCountText: { color: '#64748b', fontSize: '1.1rem', marginBottom: '40px' },
   cartList: { display: 'flex', flexDirection: 'column', gap: '20px' },
-  cartItem: { display: 'flex', gap: '25px', border: '1px solid rgba(255,255,255,0.9)', padding: '25px', borderRadius: '20px', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' },
+  cartItem: { display: 'flex', gap: '20px', border: '1px solid rgba(255,255,255,0.9)', padding: '25px', borderRadius: '20px', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', boxShadow: '0 10px 30px rgba(0,0,0,0.03)',boxSizing: 'border-box',flexWrap: 'wrap' },
   imageWrapper: { width: '100px', height: '100px', borderRadius: '16px', overflow: 'hidden', flexShrink: 0 },
   image: { width: '100%', height: '100%', objectFit: 'cover' },
   details: { flex: 1 },
@@ -459,7 +459,7 @@ const styles = {
   controls: { display: 'flex', alignItems: 'center', marginTop: '15px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '50px', width: 'fit-content', overflow: 'hidden' },
   qtyBtn: { padding: '8px 15px', cursor: 'pointer', backgroundColor: 'transparent', border: 'none', color: '#0f172a', fontWeight: '800', fontSize: '1.1rem' },
   qtyNum: { padding: '0 15px', fontWeight: '800', color: '#0f172a', fontSize: '1.1rem' },
-  actions: { textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', gap: '15px' },
+  actions: { textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', gap: '15px', flexShrink: 0, marginLeft: 'auto' },
   totalPrice: { fontWeight: '800', fontSize: '1.5rem', color: '#0f172a', margin: 0 },
   removeBtn: { backgroundColor: 'transparent', color: '#ef4444', border: 'none', padding: '8px 15px', borderRadius: '50px', cursor: 'pointer', fontWeight: '700', fontSize: '0.9rem', display: 'flex', alignItems: 'center' },
 
