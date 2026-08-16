@@ -140,15 +140,15 @@ function AppContent() {
         <Routes>
           {/* --- PUBLIC ROUTES --- */}
           {/* If user is logged in, '/' sends them to '/shop' */}
-          <Route path="/" element={user ? <Navigate to="/shop" /> : <LandingPage />} />
+          <Route path="/" element={user ? <Navigate to="/category/powders" /> : <LandingPage />} />
           <Route path="/about" element={<AboutUsPage />} />
           <Route path="/all-products" element={<AllProductsPage />} />
           <Route path="/contact" element={<ContactUsPage />} />
           <Route path="/bulk-order" element={<BulkOrderForm user={user} />} />
           
           {/* Login/Signup: Redirect to '/shop' if already logged in */}
-          <Route path="/login" element={!user ? <LoginPage setUser={setUser} /> : <Navigate to="/shop" />} />
-          <Route path="/signup" element={!user ? <SignupPage /> : <Navigate to="/shop" />} />
+          <Route path="/login" element={!user ? <LoginPage setUser={setUser} /> : <Navigate to="/category/powders" />} />
+          <Route path="/signup" element={!user ? <SignupPage /> : <Navigate to="/category/powders" />} />
 
           {/* --- PRIVATE ROUTES (The Dashboard) --- */}
           {/* This is the new home for logged in users */}

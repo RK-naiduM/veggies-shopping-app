@@ -13,7 +13,7 @@ const LoginPage = ({ setUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const redirectUrl = location.state?.from || '/shop';
+  const redirectUrl = location.state?.from || '/category/powders'; 
 
   const handleLogin = async (e) => {
     e.preventDefault();

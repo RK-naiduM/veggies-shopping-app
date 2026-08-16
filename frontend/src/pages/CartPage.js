@@ -169,7 +169,7 @@ const CartPage = ({ user, cart, setCart, removeFromCart, updateQuantity }) => {
       <div style={styles.emptyContent}>
         <h2 style={styles.emptyTitle}>Your Cart is Empty 🛒</h2>
         <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Looks like you haven't added any of our fresh harvest yet.</p>
-        <button onClick={() => navigate('/shop')} className="checkout-btn" style={styles.continueBtn}>
+        <button onClick={() => navigate('/category/powders')} className="checkout-btn" style={styles.continueBtn}>
           Continue Shopping
         </button>
       </div>
