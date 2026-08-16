@@ -76,6 +76,43 @@ function AppContent() {
     }
   };
 
+  // --- 4. AUTO-LOGOUT ON INACTIVITY (1 HOUR) ---
+  useEffect(() => {
+    // Only run this timer if a user is currently logged in
+    if (!user) return;
+
+    let logoutTimer;
+
+    const autoLogout = () => {
+      alert("Session expired: You have been logged out due to 1 hour of inactivity.");
+      handleLogout(); // This safely triggers your existing logout logic!
+    };
+
+    const resetTimer = () => {
+      if (logoutTimer) clearTimeout(logoutTimer);
+      // 1 hour = 1000 ms * 60 seconds * 60 minutes
+      logoutTimer = setTimeout(autoLogout, 1000 * 60 * 60); 
+    };
+
+    // 1. Start the timer immediately when they log in
+    resetTimer();
+
+    // 2. Listen for ANY user activity to reset the clock
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('keydown', resetTimer);
+    window.addEventListener('click', resetTimer);
+    window.addEventListener('scroll', resetTimer);
+
+    // 3. Cleanup listeners if the component unmounts or user logs out
+    return () => {
+      clearTimeout(logoutTimer);
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('keydown', resetTimer);
+      window.removeEventListener('click', resetTimer);
+      window.removeEventListener('scroll', resetTimer);
+    };
+  }, [user]);
+
   const removeFromCart = (productId) => {
     setCart(cart.filter(item => item._id !== productId));
   };
