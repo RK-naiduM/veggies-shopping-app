@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { FaHome, FaEye, FaEyeSlash, FaExclamationCircle } from 'react-icons/fa'; 
 import gsap from 'gsap';
+import { GoogleLogin } from '@react-oauth/google';
 import API from '../api';
 
 const LoginPage = ({ setUser }) => {
@@ -33,6 +34,28 @@ const LoginPage = ({ setUser }) => {
     } catch (err) {
       console.error(err);
       setError('Invalid Email or Password'); 
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      // 1. Send the Google ticket to our new backend route
+      const { data } = await API.post('/auth/google', { 
+        token: credentialResponse.credential 
+      });
+
+      // 2. Save Data (just like normal login)
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userInfo', JSON.stringify(data.user));
+      
+      setUser(data.user);
+      
+      // 3. Redirect them to the powders page!
+      navigate(redirectUrl); 
+
+    } catch (err) {
+      console.error("Google Login Error:", err);
+      setError('Google Sign-In Failed. Please try again.');
     }
   };
 
@@ -129,6 +152,21 @@ const LoginPage = ({ setUser }) => {
             <FaExclamationCircle /> {error}
           </div>
         )}
+
+        {/* --- 🟢 NEW: GOOGLE SSO BUTTON --- */}
+        <div className="stagger-item" style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError('Google Sign-In Failed')}
+            theme="filled_blue"
+            shape="pill"
+          />
+        </div>
+
+        <div className="stagger-item" style={{ textAlign: 'center', margin: '15px 0 25px 0', color: '#64748b', fontWeight: '700', fontSize: '0.85rem' }}>
+           — OR LOG IN WITH EMAIL — 
+        </div>
+        {/* --------------------------------- */}
         
         <form onSubmit={handleLogin}>
           <div className="stagger-item" style={{ marginBottom: '20px' }}>

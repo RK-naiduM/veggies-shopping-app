@@ -3,7 +3,9 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { OAuth2Client } = require('google-auth-library');
 
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // SECRET KEY (In a real app, put this in .env file)
 const JWT_SECRET = 'my_super_secret_key_123'; 
 
@@ -54,5 +56,58 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+// 3. GOOGLE SSO ROUTE
+router.post('/google', async (req, res) => {
+  try {
+    const { token } = req.body; // This is the Google ticket sent from the frontend
+
+    // 1. Verify the ticket with Google's servers
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    
+    // 2. Extract user info from the verified ticket
+    const { name, email, sub: googleId } = ticket.getPayload();
+
+    // 3. Check if user already exists in our database
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // If they exist but don't have a googleId (e.g., they originally signed up with a password),
+      // we can link their Google account now.
+      if (!user.googleId) {
+        user.googleId = googleId;
+        await user.save();
+      }
+    } else {
+      // 4. If they don't exist, create a new user! 
+      // Notice: We do NOT need a password here because of our Database update.
+      user = new User({
+        name,
+        email,
+        googleId,
+      });
+      await user.save();
+    }
+
+    // 5. Generate our standard 1-hour JWT for the app
+    const appToken = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
+
+    // 6. Send the user data and token back to the frontend
+    res.json({
+      token: appToken,
+      user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin }
+    });
+
+  } catch (err) {
+    console.error("Google Auth Error:", err);
+    res.status(500).json({ message: "Google authentication failed" });
+  }
+});
+
+
 
 module.exports = router;
