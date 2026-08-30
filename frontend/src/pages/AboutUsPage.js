@@ -4,8 +4,8 @@ import { FaUsers, FaTractor, FaHeart, FaCheckCircle } from 'react-icons/fa';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/all';
 
-import pranayImg from '../assets/pranay.jpg'; 
-import abhishekImg from '../assets/abhishek.jpg'; 
+import pranayImg from '../assets/pranay.webp'; 
+import abhishekImg from '../assets/abhishek.webp'; 
 
 gsap.registerPlugin(ScrollTrigger);
 

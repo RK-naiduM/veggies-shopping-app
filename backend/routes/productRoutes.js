@@ -2,18 +2,10 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
 const { protect, admin } = require('../middleware/authMiddleware');
-const multer = require("multer"); // 1. Import Multer
 
-// --- 2. CONFIGURE IMAGE STORAGE ---
-const storage = multer.diskStorage({
-    destination: "uploads", // Images will be saved in 'uploads' folder
-    filename: (req, file, cb) => {
-        // Create unique filename: timestamp + originalname
-        return cb(null, `${Date.now()}${file.originalname}`);
-    }
-});
-
-const upload = multer({ storage: storage });
+// 1. IMPORT YOUR NEW CLOUDINARY UPLOAD MIDDLEWARE
+// (Ensure the path is correct relative to this file's location)
+const upload = require('../config/uploadConfig'); 
 
 // GET all products (No changes)
 router.get('/', async (req, res) => {
@@ -54,10 +46,8 @@ router.put('/:id/stock', protect, admin, async (req, res) => {
 });
 
 // --- UPDATE PRODUCT DETAILS (Handles URL OR File) ---
-// --- UPDATE PRODUCT DETAILS (Handles URL OR File) ---
 router.put('/:id', protect, admin, upload.single("image"), async (req, res) => {
   try {
-    // 1. ADD 'stock' HERE
     const { name, description, category, price, stock, image: imageURL,about, keyBenefits, usageInfo, recommendeddosage, manufacturingInfo, highlights } = req.body;
     
     const product = await Product.findById(req.params.id);
@@ -74,16 +64,13 @@ router.put('/:id', protect, admin, upload.single("image"), async (req, res) => {
       product.recommendeddosage = recommendeddosage || product.recommendeddosage;
       product.highlights = highlights || product.highlights;
 
-      
-      // 2. ADD THIS LINE (Update the stock)
-      // We use Number() to ensure it's saved as a number, not a string
       if (stock !== undefined) {
         product.stock = Number(stock);
       }
 
-      // LOGIC: If a file is uploaded, use it. If not, use the URL provided.
+      // 2. USE REQ.FILE.PATH FOR CLOUDINARY URL
       if (req.file) {
-          product.image = `${req.file.filename}`;
+          product.image = req.file.path; 
       } else if (imageURL) {
           product.image = imageURL;
       }
@@ -99,32 +86,28 @@ router.put('/:id', protect, admin, upload.single("image"), async (req, res) => {
 });
 
 // --- CREATE PRODUCT (Handles URL OR File) ---
-// Added 'upload.single("image")' middleware
 router.post('/', protect, admin, upload.single("image"), async (req, res) => {
   try {
     const { name, description, category, price, stock, image: imageURL, about, keyBenefits, usageInfo, recommendeddosage, manufacturingInfo, highlights } = req.body;
 
-    // LOGIC: Determine the image source
-    // 1. Check if file exists (req.file)
-    // 2. Check if URL string exists (req.body.image)
     let image_filename = ""; 
     
+    // 3. USE REQ.FILE.PATH FOR CLOUDINARY URL
     if (req.file) {
-        image_filename = `${req.file.filename}`;
+        image_filename = req.file.path;
     } else if (imageURL) {
         image_filename = imageURL;
     } else {
         return res.status(400).json({ message: 'Image (File or URL) is required' });
     }
 
-    // Validation (rest of fields)
     if (!name || !description || !category || !price) {
       return res.status(400).json({ message: 'Please fill in all required fields' });
     }
 
     const product = new Product({
       name,
-      image: image_filename, // Save the result of our logic above
+      image: image_filename, 
       description,
       category,
       price: Number(price),
@@ -145,14 +128,12 @@ router.post('/', protect, admin, upload.single("image"), async (req, res) => {
   }
 });
 
-
 // --- DELETE PRODUCT ---
 router.delete('/:id', protect, admin, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
 
     if (product) {
-      // Use deleteOne() to remove it
       await product.deleteOne();
       res.json({ message: 'Product removed' });
     } else {

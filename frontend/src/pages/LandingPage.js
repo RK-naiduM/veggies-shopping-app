@@ -6,9 +6,9 @@ import {
 } from 'react-icons/fa';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/all';
-import farmBg1 from '../assets/farm-bg.png';
-import farmBg2 from '../assets/farm-bg-2.png'; 
-import farmBg3 from '../assets/farm-bg-3.png';
+import farmBg1 from '../assets/farm-bg.webp';
+import farmBg2 from '../assets/farm-bg-2.webp'; 
+import farmBg3 from '../assets/farm-bg-3.webp';
 import API from '../api'; 
 
 gsap.registerPlugin(ScrollTrigger);

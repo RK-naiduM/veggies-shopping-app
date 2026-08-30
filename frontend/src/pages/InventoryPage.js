@@ -158,8 +158,14 @@ const InventoryPage = () => {
 
   const renderImageSrc = (imgString) => {
       if (!imgString) return '';
-      if (imgString.startsWith('http')) return imgString;
-      return `${BACKEND_URL}/images/${imgString}`;
+      
+      // If it's an old local image (doesn't start with http), prepend the backend URL
+      if (!imgString.startsWith('http')) {
+          return `${BACKEND_URL}/images/${imgString}`;
+      }
+      
+      // If it's a new Cloudinary image (starts with http), return it directly
+      return imgString;
   };
 
   if (loading) return <h3 style={{ textAlign: 'center', marginTop: '50px' }}>Loading Inventory...</h3>;

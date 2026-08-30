@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { FaArrowRight } from 'react-icons/fa';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import logo from '../assets/logo.png'; 
-import farmBg from '../assets/farm-bg.png'; 
+import logo from '../assets/logo.webp'; 
+import farmBg from '../assets/farm-bg.webp'; 
 
 gsap.registerPlugin(ScrollTrigger);
 

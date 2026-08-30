@@ -5,7 +5,7 @@ import {
   FaLock, FaBars, FaTimes, FaChevronDown 
 } from 'react-icons/fa';
 import gsap from 'gsap';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo.webp';
 import API from '../api';
 
 const Navbar = ({ user, cartCount, handleLogout }) => {

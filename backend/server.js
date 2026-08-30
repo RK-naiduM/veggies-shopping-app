@@ -1,10 +1,11 @@
+require('dotenv').config();
 require('dns').setDefaultResultOrder('ipv4first'); // Forces Node to use IPv4
 
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
+
 
 const productRoutes = require('./routes/productRoutes');
 const bulkOrderRoutes = require('./routes/bulkOrderRoutes');
