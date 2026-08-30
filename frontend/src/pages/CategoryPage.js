@@ -82,7 +82,7 @@ const CategoryPage = () => {
   }, [loading, filteredProducts.length, products.length]);
 
   return (
-    <div ref={compRef} className="ambient-bg" style={styles.container}>
+    <main ref={compRef} className="ambient-bg" style={styles.container}>
       
       {/* --- UPGRADED THEME CSS --- */}
       <style>
@@ -156,6 +156,7 @@ const CategoryPage = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="fancy-input"
               style={styles.searchInput}
+              aria-label={`Search in ${categoryName}`}
               />
           )}
         </div>
@@ -195,7 +196,7 @@ const CategoryPage = () => {
             
             /* Normal Product Grid */
             <div className="product-grid" style={styles.productGrid}>
-              {filteredProducts.map((product) => (
+              {filteredProducts.map((product, index) => (
                 <div key={product._id} className="product-card" style={styles.productCard}>
                   
                   <div style={styles.imageWrapper}>
@@ -203,7 +204,8 @@ const CategoryPage = () => {
                           src={renderImageSrc(product.image)} 
                           alt={product.name} 
                           className="product-image"
-                          style={styles.productImage} 
+                          style={styles.productImage}
+                          fetchpriority={index === 0 ? "high" : "auto"} 
                       />
                       <div style={styles.imageOverlay}></div>
                   </div>
@@ -235,7 +237,7 @@ const CategoryPage = () => {
         </div>
 
       </div>
-    </div>
+    </main>
   );
 };
 
