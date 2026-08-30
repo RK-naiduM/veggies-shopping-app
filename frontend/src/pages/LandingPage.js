@@ -225,7 +225,7 @@ const LandingPage = () => {
         ) : products.length > 0 ? (
           <div style={styles.carouselContainer}>
             {products.length > itemsToShow && (
-              <button onClick={prevSlide} className="carousel-arrow" style={{...styles.arrowBtn, left: isMobile ? '0px' : '-25px'}}><FaChevronLeft /></button>
+              <button onClick={prevSlide} className="carousel-arrow" aria-label="Previous products" style={{...styles.arrowBtn, left: isMobile ? '0px' : '-25px'}}><FaChevronLeft /></button>
             )}
 
             <div className="carousel-track product-carousel-track" style={styles.carouselTrack}>
@@ -245,7 +245,7 @@ const LandingPage = () => {
             </div>
 
             {products.length > itemsToShow && (
-              <button onClick={nextSlide} className="carousel-arrow" style={{...styles.arrowBtn, right: isMobile ? '0px' : '-25px'}}><FaChevronRight /></button>
+              <button onClick={nextSlide} className="carousel-arrow" aria-label="Next products" style={{...styles.arrowBtn, right: isMobile ? '0px' : '-25px'}}><FaChevronRight /></button>
             )}
           </div>
         ) : (
@@ -271,7 +271,7 @@ const LandingPage = () => {
         ) : blogs.length > 0 ? (
           <div style={styles.carouselContainer}>
             {blogs.length > itemsToShow && (
-              <button onClick={prevBlogSlide} className="carousel-arrow" style={{...styles.arrowBtn, left: isMobile ? '0px' : '-25px'}}><FaChevronLeft /></button>
+              <button onClick={prevBlogSlide} className="carousel-arrow" aria-label="Previous stories" style={{...styles.arrowBtn, left: isMobile ? '0px' : '-25px'}}><FaChevronLeft /></button>
             )}
 
             <div className="carousel-track blog-carousel-track" style={styles.carouselTrack}>
@@ -292,7 +292,7 @@ const LandingPage = () => {
             </div>
 
             {blogs.length > itemsToShow && (
-              <button onClick={nextBlogSlide} className="carousel-arrow" style={{...styles.arrowBtn, right: isMobile ? '0px' : '-25px'}}><FaChevronRight /></button>
+              <button onClick={nextBlogSlide} className="carousel-arrow" aria-label="Next stories" style={{...styles.arrowBtn, right: isMobile ? '0px' : '-25px'}}><FaChevronRight /></button>
             )}
           </div>
         ) : (
