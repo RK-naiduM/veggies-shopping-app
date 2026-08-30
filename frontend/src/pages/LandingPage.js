@@ -161,7 +161,7 @@ const LandingPage = () => {
   }, [isLoading, products.length, isLoadingBlogs, blogs.length]); 
 
   return (
-    <div ref={compRef} style={styles.container}>
+    <main ref={compRef} style={styles.container}>
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
@@ -369,7 +369,7 @@ const LandingPage = () => {
             </div>
         </div>
       )}
-    </div>
+    </main>
   );
 };
 
@@ -381,7 +381,7 @@ const getStyles = (isMobile) => ({
     position: 'relative', width: '100%', minHeight: isMobile ? '500px' : '700px', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', backgroundColor: '#000', 
   },
   heroBgLayer: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundSize: 'cover', backgroundPosition: 'center' },
-  heroDarkOverlay: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%)', zIndex: 2 },
+  heroDarkOverlay: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.9) 100%)', zIndex: 2 },
   heroContent: { position: 'relative', zIndex: 3, textAlign: 'center', color: 'white', padding: isMobile ? '0 25px' : '0 50px' },
   heroTitle: { fontSize: isMobile ? '3rem' : '5.5rem', marginBottom: '20px', lineHeight: 1.05, fontWeight: '800', letterSpacing: '-2px', textShadow: '0 10px 30px rgba(0,0,0,0.5)' },
   heroText: { fontSize: isMobile ? '1.1rem' : '1.5rem', maxWidth: '800px', margin: '0 auto 40px', lineHeight: 1.6, fontWeight: '400', color: 'rgba(255,255,255,0.9)', textShadow: '0 5px 15px rgba(0,0,0,0.5)' },
