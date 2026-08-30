@@ -13,7 +13,7 @@ const AllProductsPage = () => {
 
   const BACKEND_URL = window.location.hostname === 'localhost' 
     ? "http://localhost:5000" 
-    : "https://ag-5b5404c015c74239af5a9e0cd3c0bdd2.ecs.us-east-1.on.aws"; 
+    : "https://veggies-shopping-app.onrender.com"; 
 
   useEffect(() => {
     const fetchProducts = async () => {
