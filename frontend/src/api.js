@@ -5,7 +5,7 @@ import axios from 'axios';
 // This automatically switches between Localhost (for you) and aws (for the public)
 const API_URL = window.location.hostname === 'localhost' 
   ? "http://localhost:8080/api" 
-  : "https://ag-5b5404c015c74239af5a9e0cd3c0bdd2.ecs.us-east-1.on.aws/api";
+  : "https://ag-5b5404c015c74239af5a9e0cd3c0bdd2.ecs.us-east-1.on.aws";
 
 const API = axios.create({
   baseURL: API_URL
